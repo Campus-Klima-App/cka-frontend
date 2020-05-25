@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Data Driven Documents</title>
     <style>
+        h1{
+            color: white;
+            font-size: 32px;
+            text-align: center;
+        }
         body {
             font: 10px sans-serif;
             background-color: #000000;
@@ -16,8 +21,8 @@
         }
         .dot {
             fill: white;
-            stroke: steelblue;
-            stroke-width: 1.5px;
+            stroke: darkred;
+            stroke-width: 3px;
         }
 
         .axis path,
@@ -29,6 +34,7 @@
         }
     </style>
 <body>
+<h1>Beispieldaten aus TTN Datenbank</h1>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -37,11 +43,11 @@
     var line;
 
     var margin = {top: 20, right: 30, bottom: 30, left: 60},
-        width = 1200 - margin.left - margin.right,
+        width = 1700 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
 
-    var jsonfile;
+    /*var jsonfile;
     $.ajax({
         url: 'https://997575.data.thethingsnetwork.org/api/v2/query',
         type: 'GET',
@@ -52,7 +58,7 @@
         }, success: function(data){
 
         }
-    });
+    });*/
 
     d3.json("https://gist.githubusercontent.com/mickey175/bb19eff9e1625f9db89b68cff9cb5aed/raw/e34ca59f86305cc5d87a99ae195e7e78c811f434/data.json", function(error, data) {
 
@@ -72,8 +78,89 @@
         * when document is loaded show the first lines and the get the sensor/date data
         **/
         drawLine("white",xScale,yScale,g,data); // draw the first line when document is loaded
-
+        createBarChart("white", "yellow",data);
     });
+
+    function createBarChart(fontColor, color, data){
+
+        var margin = ({top: 20, right: 0, bottom: 30, left: 40});
+        var width = 200;
+        var height = 800;
+
+        var x = d3.scaleBand()
+            .domain(d3.range(1))
+            .range([margin.left, 100])
+            .padding(0.1);
+
+        // get highest value from all data
+        var batteryStatus = 0;
+        var batteryMin = 0;
+        var batteryMax = 4500;
+        var batteryMaxPercent = (4500*100)/4500;
+
+        data.forEach(function(data){
+            if(data.battery >= batteryStatus){
+                batteryStatus = data.battery;
+            }
+        });
+
+        var y = d3.scaleLinear()
+            .domain([batteryMin, d3.max(data, function(d) { return d.battery*100/batteryMax; })]).nice()
+            .range([height - margin.bottom, margin.top]);
+
+        var xAxis = g => g
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .attr("fill",fontColor)
+            .call(d3.axisBottom(x).tickFormat(i => data[i].device_id).tickSizeOuter(0));
+
+        var yAxis = g => g
+            .attr("transform", `translate(${margin.left},0)`)
+            .attr("stroke",fontColor)
+            .call(d3.axisLeft(y));
+
+        var svg = d3.select("body").append("svg")
+            .data(data)
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .style("background", "#fff")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("font-size", "14px")
+            .style("padding", "10px")
+            .text("nothing...");
+
+        svg.append("rect")
+            .attr("fill", color)
+            .data(data)
+            .attr("x", (d, i) => x(i))
+            .attr("y", d => y((d.battery*100)/batteryMax))
+            .attr("height", d => y(0) - y((d.battery*100)/batteryMax))
+            .attr("width", 50)
+            .on("mouseover", function(d){tooltip.text("Batteriestatus: "+(d.battery*100)/batteryMax+" %"); return tooltip.style("visibility", "visible");})
+            .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+            .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+        svg.append("g")
+            .call(xAxis)
+            .attr("stroke",fontColor);
+
+        svg.append("g")
+            .call(yAxis)
+            .attr("stroke",fontColor);
+
+
+
+        return svg.node();
+    }
 
     /* draw a single line depending on id, unit and data*/
     function drawLine(color,xScale,yScale,g,data){
@@ -130,7 +217,6 @@
             .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
         return line;
-
     }
 
     /*get x-axis range by month*/
