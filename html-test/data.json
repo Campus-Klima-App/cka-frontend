@@ -1,0 +1,470 @@
+[
+  {
+    "battery": 4446,
+    "device_id": "node",
+    "event": "interval",
+    "light": 26,
+    "raw": "EV4AGgnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:10:19.708338623Z"
+  },
+  {
+    "battery": 4440,
+    "device_id": "node",
+    "event": "interval",
+    "light": 26,
+    "raw": "EVgAGgnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:11:22.181235994Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:12:24.604521569Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:13:27.073576748Z"
+  },
+  {
+    "battery": 4414,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "ET4AGQnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:14:29.564378881Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:15:32.060483804Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:16:34.454302441Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:17:36.95197736Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:18:39.447605783Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:19:41.836373331Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:20:44.345912525Z"
+  },
+  {
+    "battery": 4446,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EV4AGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:21:46.832029292Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:22:49.323931938Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:23:51.728569175Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:24:54.222933821Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:25:56.710341767Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:26:59.201345413Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWQAFwnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:28:01.599331649Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:29:04.102258196Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWwAFwnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:30:06.591097342Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWQAFwnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:31:08.991996879Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWwAFwnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:32:11.481731325Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWwAFwnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:33:13.998392773Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EWwAFwnd",
+    "temperature": 25.25,
+    "time": "2020-05-27T15:34:16.506171821Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:35:18.864604854Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:36:21.363271201Z"
+  },
+  {
+    "battery": 4420,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EUQAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:37:23.849958447Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:38:26.346893794Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:39:28.740869418Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 25,
+    "raw": "EWwAGQnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:40:31.23519964Z"
+  },
+  {
+    "battery": 4466,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EXIAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:41:33.744111963Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:42:36.223782184Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:43:53.666444988Z"
+  },
+  {
+    "battery": 4466,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EXIAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:45:14.772668556Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:46:35.794130919Z"
+  },
+  {
+    "battery": 4472,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EXgAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:47:56.916629389Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:49:17.932598351Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:50:38.962523914Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:52:00.081677083Z"
+  },
+  {
+    "battery": 4460,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWwAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:53:21.104398746Z"
+  },
+  {
+    "battery": 4446,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EV4AGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:54:42.231834116Z"
+  },
+  {
+    "battery": 4466,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EXIAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:56:03.248036618Z"
+  },
+  {
+    "battery": 4466,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EXIAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T15:57:24.285823751Z"
+  },
+  {
+    "battery": 4466,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EXIAFwnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T15:58:45.407414989Z"
+  },
+  {
+    "battery": 4446,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EV4AFwnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:00:06.41626232Z"
+  },
+  {
+    "battery": 4446,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EV4AFwnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:01:27.539496758Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:02:48.570837091Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T16:04:09.585121122Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnj",
+    "temperature": 25.31,
+    "time": "2020-05-27T16:05:30.728182962Z"
+  },
+  {
+    "battery": 4440,
+    "device_id": "node",
+    "event": "interval",
+    "light": 23,
+    "raw": "EVgAFwnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:06:51.826546899Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:08:12.871791332Z"
+  },
+  {
+    "battery": 4452,
+    "device_id": "node",
+    "event": "interval",
+    "light": 24,
+    "raw": "EWQAGAnq",
+    "temperature": 25.38,
+    "time": "2020-05-27T16:09:33.876193263Z"
+  }
+]
