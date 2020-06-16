@@ -1,0 +1,67 @@
+.menu {
+    position: absolute;
+    left: 0;
+    width: 80px;
+    height: 100%;
+    flex-direction: column;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+    background: #f6f6f6;
+}
+
+.menuList {
+    margin: 0;
+    list-style: none;
+    display: flex;
+    width: 100%;
+    min-height: 40%;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+.menuList li {
+    display: block;
+    cursor: pointer;
+    height: 50px;       /* The icon size */
+    width: 50px;        /* The icon size */
+    opacity: 0.8;
+    margin: 5px 0;
+}
+
+li.activeEntry {
+    border-radius: 50%;
+    background: #7ba9e2;
+    opacity: 1;
+}
+
+.activeEntry img {
+    filter: brightness(400%);
+}
+
+.modeImg {
+    width: 100%;
+    padding: 5px;
+}
+
+@media (max-width: 500px) {
+    .menu {
+        bottom: 0;
+        height: 80px;
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .menuList {
+        height: 100%;
+        width: auto;
+        flex-direction: row;
+    }
+
+    .menuList li {
+        display: inline-block;
+        margin: 0 5px;
+    }
+}

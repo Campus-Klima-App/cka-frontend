@@ -1,0 +1,52 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.App {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    background: #2d323c;
+}
+
+#content {
+    position: absolute;
+    top: 0;
+    left: 80px;
+    right: 0;
+    bottom: 0;
+    padding: 20px;
+}
+
+@media (max-width: 500px) {
+    #content {
+        left: 0;
+        bottom: 80px;
+    }
+}
+
+[class^="graphic"] {
+    width: 100%;
+    height: 100%;
+    background: #323641;
+    border: 1px solid grey;
+}
+
+/* The numbers after "graphic" are created by the lineGraph component */
+.graphic0 {
+    color: #d46969;
+}
+
+.graphic1 {
+    color: #c3d76c;
+}
+
+.graphic2 {
+    color: #6aadd9;
+}
+
+.graphic3 {
+    color: #816ad7;
+}

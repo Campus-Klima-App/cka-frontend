@@ -1,3 +1,4 @@
+/*
 import * as d3 from "d3";
 
 var line;
@@ -26,6 +27,7 @@ d3.json("https://gist.githubusercontent.com/mickey175/bb19eff9e1625f9db89b68cff9
     /*
     * when document is loaded show the first lines and the get the sensor/date data
     **/
+/*
     drawLine(xScale,yScale,g,data); // draw the first line when document is loaded
     createBarChart("white", "yellow",data);
     createDonutChart(data);
@@ -189,8 +191,10 @@ function createDonutChart(data){
 
 
 }
+*/
 
 /* draw a single line depending on id, unit and data*/
+/*
 function drawLine(xScale,yScale,g,data){
 
     var data_array = [];
@@ -244,8 +248,9 @@ function drawLine(xScale,yScale,g,data){
 
     return line;
 }
-
+*/
 /*get x-axis range by month*/
+/*
 function selectX_axisRange(data,svg){
 
     var endDate = new Date(2020,0,0,0);
@@ -321,8 +326,9 @@ function selectY_axisRange(data,svg){
 
     return yScale;
 }
-
+*/
 /*choose random colors for the lines*/
+/*
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
@@ -331,4 +337,4 @@ function getRandomColor() {
     }
     return color;
 }
-
+*/
