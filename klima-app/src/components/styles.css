@@ -1,23 +1,24 @@
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+html, body {
+    width: 100%;
+    height: 100%;
 }
 
 .App {
     position: absolute;
     width: 100%;
-    height: 100vh;
     background: #2d323c;
+    height: 100%;
 }
 
 #content {
+    overflow-y: auto;
+    overflow-x: hidden;
     position: absolute;
     top: 0;
     left: 80px;
     right: 0;
     bottom: 0;
-    padding: 20px;
+    padding: 30px;
 }
 
 @media (max-width: 500px) {
@@ -27,26 +28,28 @@
     }
 }
 
-[class^="graphic"] {
-    width: 100%;
-    height: 100%;
-    background: #323641;
-    border: 1px solid grey;
+.lineContainer {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
 }
 
-/* The numbers after "graphic" are created by the lineGraph component */
-.graphic0 {
-    color: #d46969;
+.vis {
+    position: relative;
+    height: 80vh;
+    max-height: 300px;
+    max-width: 1000px;
+    margin: 0 auto 50px auto;
+    background: #39404d;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
 }
 
-.graphic1 {
-    color: #c3d76c;
-}
-
-.graphic2 {
-    color: #6aadd9;
-}
-
-.graphic3 {
-    color: #816ad7;
+.vis h4 {
+    color: white;
+    margin: 0 20px 30px auto;
+    text-align: right;
 }

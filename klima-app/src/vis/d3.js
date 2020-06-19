@@ -1,5 +1,16 @@
+
+
 /*
-import * as d3 from "d3";
+const svg = d3.selectAll(".lineGraph");
+svg.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 100)
+    .attr("height", 100);
+
+
+
+
 
 var line;
 

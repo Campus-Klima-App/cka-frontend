@@ -1,5 +1,5 @@
 .menu {
-    position: absolute;
+    position: fixed;
     left: 0;
     width: 80px;
     height: 100%;
@@ -7,8 +7,8 @@
     user-select: none;
     display: flex;
     justify-content: center;
-    z-index: 1000;
-    background: #f6f6f6;
+    background: #fff;
+    box-shadow: 0 0 20px 0 rgba(0,0,0,0.2);
 }
 
 .menuList {
@@ -25,25 +25,29 @@
 .menuList li {
     display: block;
     cursor: pointer;
-    height: 50px;       /* The icon size */
-    width: 50px;        /* The icon size */
+    height: 55px;
+    width: 55px;
     opacity: 0.8;
-    margin: 5px 0;
+    margin: 10px 0;
+
 }
 
 li.activeEntry {
     border-radius: 50%;
-    background: #7ba9e2;
+    background: #3b72ff;
     opacity: 1;
 }
 
-.activeEntry img {
+.activeEntry .modeImg {
     filter: brightness(400%);
 }
 
 .modeImg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    padding: 5px;
+    padding: 10px;
 }
 
 @media (max-width: 500px) {
@@ -62,6 +66,6 @@ li.activeEntry {
 
     .menuList li {
         display: inline-block;
-        margin: 0 5px;
+        margin: 0 10px;
     }
 }
