@@ -7,7 +7,7 @@
     user-select: none;
     display: flex;
     justify-content: center;
-    background: #fff;
+    background: #435883;
     box-shadow: 0 0 20px 0 rgba(0,0,0,0.2);
 }
 
@@ -34,12 +34,12 @@
 
 li.activeEntry {
     border-radius: 50%;
-    background: #3b72ff;
+    background: #506c9f;
     opacity: 1;
 }
 
 .activeEntry .modeImg {
-    filter: brightness(400%);
+
 }
 
 .modeImg {
@@ -48,6 +48,7 @@ li.activeEntry {
     justify-content: center;
     width: 100%;
     padding: 10px;
+    filter: brightness(1000%);
 }
 
 @media (max-width: 500px) {

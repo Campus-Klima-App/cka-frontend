@@ -6,7 +6,8 @@ html, body {
 .App {
     position: absolute;
     width: 100%;
-    background: #2d323c;
+    /*background: #2d323c;*/
+    background: #fcfcfc;
     height: 100%;
 }
 
@@ -18,7 +19,6 @@ html, body {
     left: 80px;
     right: 0;
     bottom: 0;
-    padding: 30px;
 }
 
 @media (max-width: 500px) {
@@ -28,28 +28,46 @@ html, body {
     }
 }
 
-.lineContainer {
-    position: absolute;
-    top: 80px;
-    left: 20px;
-    right: 20px;
-    bottom: 20px;
-}
-
 .vis {
     position: relative;
-    height: 80vh;
-    max-height: 300px;
-    max-width: 1000px;
-    margin: 0 auto 50px auto;
-    background: #39404d;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+    height: 50vh;
+    min-height: 350px;
+    padding:  30px;
 }
 
 .vis h4 {
-    color: white;
-    margin: 0 20px 30px auto;
-    text-align: right;
+    color: #b4bac4;
+    text-align: center;
+}
+
+.svgContainer {
+    position: absolute;
+    top: 100px;
+    bottom: 30px;
+    left: 30px;
+    right: 30px;
+}
+
+.tick {
+    color: #757575;
+    font-size: 16px;
+}
+
+.tick text {
+    color: #8c8c8c;
+}
+
+.domain {
+    color: #c6c6c6;
+}
+
+.dot {
+    fill: #8298bc;
+    opacity: 0.4;
+}
+
+.line {
+    stroke: #8298bc;
+    stroke-width: 2;
+    fill: none;
 }
