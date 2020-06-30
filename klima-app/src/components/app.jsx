@@ -34,20 +34,32 @@ function App() {
         if (id === 0) return null
         else if (id === 1) {
             return (
+                <React.Fragment>
                 <div className="vis">
-                    <h4 >Temperatur</h4 >
-                    <LineGraph key={activeEntry.name} data={data} y_ID="temperature" />
+                    <p >Temperatur</p >
+                    <div>
+                        <LineGraph key={activeEntry.name} data={data} y_ID="temperature" />
+                    </div>
                 </div >
+                <div className="vis">
+                    <p >Temperatur</p >
+                    <div>
+                        <LineGraph key={activeEntry.name} data={data} y_ID="temperature" />
+                    </div>
+                </div >
+                </React.Fragment>
             )
         }
     }
 
     return (
         <div className="App">
-            <div id="content">
-                {switchVis()}
-            </div>
-            <Menu entries={entries} active={activeEntry} select={selection => setActiveEntry(selection)} />
+            <div id="content">{switchVis()}</div>
+            <Menu entries={entries}
+                  active={activeEntry}
+                  select={selection => setActiveEntry(selection)}
+            />
+            <div id="tooltip" />
         </div>
     );
 }

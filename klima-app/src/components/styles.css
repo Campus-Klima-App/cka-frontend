@@ -1,6 +1,7 @@
 html, body {
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
 }
 
 .App {
@@ -29,32 +30,34 @@ html, body {
 }
 
 .vis {
-    position: relative;
-    height: 50vh;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
     min-height: 350px;
-    padding:  30px;
 }
 
-.vis h4 {
-    color: #b4bac4;
+.vis p {
+    color: #8d8d8d;
+    font-size: 22px;
     text-align: center;
 }
 
 .svgContainer {
-    position: absolute;
-    top: 100px;
-    bottom: 30px;
-    left: 30px;
-    right: 30px;
+    height: 250px;
 }
 
 .tick {
     color: #757575;
-    font-size: 16px;
+    fill: #a4c5ff;
 }
 
 .tick text {
+    font-size: 16px;
     color: #8c8c8c;
+    user-select: none;
+    text-align: center;
 }
 
 .domain {
@@ -62,12 +65,20 @@ html, body {
 }
 
 .dot {
-    fill: #8298bc;
-    opacity: 0.4;
+    fill: rgba(66, 89, 159, 0.7);
 }
 
-.line {
-    stroke: #8298bc;
-    stroke-width: 2;
-    fill: none;
+.dotSelected {
+    fill: #a2acd7;
+}
+
+#tooltip {
+    position: absolute;
+    background: #42599f;
+    z-index: 100;
+    border-radius: 5px;
+    padding: 10px;
+    display: none;
+    font-size: 16px;
+    color: white;
 }
