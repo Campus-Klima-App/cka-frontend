@@ -19,31 +19,27 @@ const useContainerDimensions = (myRef) => {
 
 export default function LineGraph({data, y_ID}) {
 
-    let containerRef = useRef(), marginsGroup = useRef(), dotsContainerRef = useRef(), textXRef = useRef(),
-        textYRef = useRef(), xAxisRef = useRef(), yAxisRef = useRef(), pathRef = useRef()
+    let containerRef = useRef(), dotsContainerRef = useRef(), xAxisRef = useRef(), yAxisRef = useRef()
+    const tooltip = d3.select("#tooltip");
 
     const {width, height} = useContainerDimensions(containerRef);
     const [dataArray, setDataArray] = useState([]);
     const [dataMinMax, setDataMinMax] = useState([]);
     const [xScaling, setXScaling] = useState(null);
-    const tooltip = d3.select("#tooltip")
 
     const margin = {left: 40, right: 30, top: 40, bottom: 35};
 
     useEffect(() => {
-        if (data == null) return null;
+        if (data == null) return (<div>NO DATA</div>);
         updateData();
     }, [data]);
 
     function updateData() {
 
-        const getEvery = 2; // Reduction of test data, only for testing purposes
+        const getEvery = 1; // Reduction of test data, only for testing purposes
 
-        const datArr = data.map((d, i) => {
-            if (i % getEvery === 0)
-                return [new Date(d.time), d[y_ID]]
-            return [new Date(d.time), null]
-        }).filter(d => d[1] !== null);
+        const datArr = data.map(d => [new Date(d.time), d[y_ID]])
+            .filter((d, i) => i % getEvery === 0);
 
         const dateMin = d3.min(datArr, d => d[0]);
         const dateMax = d3.max(datArr, d => d[0]);
@@ -65,24 +61,12 @@ export default function LineGraph({data, y_ID}) {
         const w = width - (margin.left + margin.right);
         const h = height - (margin.top + margin.bottom)
 
-        if (!xScaling) return;
-        const filterData = variableTicks(w, dataArray.length);
-
-        d3.select(marginsGroup.current)
-            .attr("transform", `translate(${margin.left},${margin.top})`)
-
-        d3.select(textXRef.current)
-            .attr("x", w / 2)
-            .attr("y", h + 40)
-
-        d3.select(textYRef.current)
-            .attr("y", -margin.left + 25)
-            .attr("x", -h / 2)
-            .attr("transform", "rotate(-90)")
-
         const xScale = d3.scaleTime()
-            .domain(d3.extent(filterData, d => d[0]))
+            .domain(d3.extent(dataArray, d => d[0]))
             .range([20, w])
+
+        if (!xScaling) return;
+        const filterData = variableTicks(w, dataArray.length, xScale);
 
         const yScale = d3.scaleLinear()
             .domain(dataMinMax)
@@ -92,9 +76,10 @@ export default function LineGraph({data, y_ID}) {
             .tickFormat(multiFormat)
             .tickPadding(10)
             .tickValues(filterData.map(d => d[0]))
+            .tickSize(-h)
 
         const yAxis = d3.axisLeft(yScale)
-            .ticks(5/*, ",.1f"*/)
+            .ticks(5)
             .tickPadding(10)
 
         d3.select(xAxisRef.current)
@@ -105,7 +90,7 @@ export default function LineGraph({data, y_ID}) {
             .call(yAxis)
 
         d3.select(dotsContainerRef.current).selectAll("circle")
-            .data(filterData)
+            .data(dataArray)
             .join("circle")
             .attr("cx", d => {
                 return xScale(d[0])
@@ -140,7 +125,8 @@ export default function LineGraph({data, y_ID}) {
     const tooltipContent = (tooltip, datum, dot) => {
         tooltip.text(
             datum[1] + "°C  - " + new Date(datum[0]).getHours() + ":" +
-            zeroPad(datum[0].getMinutes(), 2) + " Uhr");
+            zeroPad(datum[0].getMinutes(), 2) + " Uhr"
+        );
         tooltip.style("display", "block");
         d3.select(dot)
             .classed("dotSelected", true)
@@ -154,17 +140,44 @@ export default function LineGraph({data, y_ID}) {
 
     // Reduces or increases the number of rendered data-points and axis labels
     // based on the width of the svg
-    const variableTicks = (width, timeCount) => {
+    const variableTicks = (width, timeCount, xScale) => {
+
+        let prev;
+
+        const filterData = dataArray.filter((datum, i) => {
+            if (i > 0) {
+                if (xScale(datum[0]) - xScale(prev) > 50)
+                    return datum;
+            } else {
+                return datum;
+            }
+            prev = datum[0];
+        })
+
+        /*
         const spacing = Math.floor(width / timeCount);
 
+        let breakSpace = 55;
+        let counter = 1;
+
         if (xScaling === "minute" || xScaling === "hour") {
-            return (
-                    spacing > 55 ? dataArray
-                :   spacing > 30 ? dataArray.filter((d, i) => i % 2 === 0)
-                :   spacing > 15 ? dataArray.filter((d, i) => i % 3 === 0)
-                :   dataArray.filter((d, i) => i % 6 === 0)
-            );
+            while (spacing < breakSpace) {
+                if (counter < 2) counter += 1;
+                else counter += 2;
+                breakSpace = breakSpace/1.8;
+            }
+            return (dataArray.filter((d, i) => i % counter === 0));
         }
+        if (xScaling === "day") {
+            while (spacing < breakSpace) {
+                if (counter < 2) counter += 1;
+                else counter += 2;
+                breakSpace = breakSpace/1.8;
+            }
+            return (dataArray.filter((d, i) => i % counter === 0));
+        }
+*/
+        return filterData;
     }
 
     // Formatting for german language
@@ -190,7 +203,7 @@ export default function LineGraph({data, y_ID}) {
         if (xScaling === "minute")
             return locale.format("%-H:%M")(date);
         if (xScaling === "hour")
-            return locale.format("%-H:00")(date);
+            return locale.format("%-H:%M")(date);
         if (xScaling === "day")
             return locale.format("%-d. %b")(date);
         if (xScaling === "month")
@@ -202,15 +215,14 @@ export default function LineGraph({data, y_ID}) {
     return (
         <div className="svgContainer" ref={containerRef} >
             <svg height="100%" width="100%" >
-                <g ref={marginsGroup} >
-                    <g ref={xAxisRef} >
+                <g transform={`translate(${margin.left},${margin.top})`}>
+                    <text x="-10" y="-20" textAnchor="middle" className="yLabel">°C</text>
+                    <g ref={xAxisRef} className="xAxis">
+                    </g>
+                    <g ref={yAxisRef} className="yAxis">
+                    </g>
+                    <g ref={dotsContainerRef}>
                     </g >
-                    <g ref={yAxisRef} >
-                    </g >
-                    <g ref={dotsContainerRef} >
-                    </g >
-                    <path ref={pathRef} >
-                    </path >
                 </g >
             </svg >
         </div >

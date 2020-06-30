@@ -3,6 +3,7 @@ import LineGraph from './lineGraph';
 import Menu from './menu';
 import './styles.css';
 import * as d3 from "d3";
+import {testdata} from '../testdata.js';
 
 import CO_Icon from '../icons/CO_Icon.svg';
 import Temp_Icon from '../icons/Temp_Icon.svg';
@@ -22,9 +23,9 @@ function App() {
     const [data, setData] = useState(null);
 
     if (allowFetch) {
-        d3.json("https://gist.githubusercontent.com/mickey175/bb19eff9e1625f9db89b68cff9cb5aed/raw/f710ad6374e04fc5bcaf69852a34fd9c35f6831c/data.json")
-            .then(d => setData(d));
-
+        //d3.json("https://gist.githubusercontent.com/mickey175/bb19eff9e1625f9db89b68cff9cb5aed/raw/f710ad6374e04fc5bcaf69852a34fd9c35f6831c/data.json")
+        //    .then(d => setData(d));
+            setData(testdata);
         setAllowFetch(false);
     }
 
