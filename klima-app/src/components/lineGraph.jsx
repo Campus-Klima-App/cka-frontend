@@ -25,7 +25,6 @@ export default function LineGraph({data, y_ID}) {
     const {width, height} = useContainerDimensions(containerRef);
     const [dataArray, setDataArray] = useState([]);
     const [dataMinMax, setDataMinMax] = useState([]);
-    const [xScaling, setXScaling] = useState(null);
 
     const margin = {left: 40, right: 30, top: 40, bottom: 35};
 
@@ -41,17 +40,6 @@ export default function LineGraph({data, y_ID}) {
         const datArr = data.map(d => [new Date(d.time), d[y_ID]])
             .filter((d, i) => i % getEvery === 0);
 
-        const dateMin = d3.min(datArr, d => d[0]);
-        const dateMax = d3.max(datArr, d => d[0]);
-
-        setXScaling(
-            d3.timeYear.count(dateMin, dateMax) > 1 ? "year"
-            :   d3.timeMonth.count(dateMin, dateMax) > 1 ? "month"
-            :   d3.timeDay.count(dateMin, dateMax) > 1 ? "day"
-            :   d3.timeHour.count(dateMin, dateMax) > 1 ? "hour"
-            :   "minute"
-        );
-
         setDataArray(datArr);
         setDataMinMax([0, 30]);
     }
@@ -61,21 +49,23 @@ export default function LineGraph({data, y_ID}) {
         const w = width - (margin.left + margin.right);
         const h = height - (margin.top + margin.bottom)
 
-        const xScale = d3.scaleTime()
-            .domain(d3.extent(dataArray, d => d[0]))
-            .range([20, w])
 
-        if (!xScaling) return;
-        const filterData = variableTicks(w, dataArray.length, xScale);
+        const dateMinMax = d3.extent(dataArray, d => d[0]);
+        const count = calculateLabelCount(w);
+        const [labelData, newDateMinMax, xScaling] = variableTicks(count, dateMinMax);
+
+        const xScale = d3.scaleTime()
+            .domain(newDateMinMax)
+            .range([20, w])
 
         const yScale = d3.scaleLinear()
             .domain(dataMinMax)
             .range([h - 20, 0])
 
         const xAxis = d3.axisBottom(xScale)
-            .tickFormat(multiFormat)
+            .tickFormat(d => multiFormat(d, xScaling))
             .tickPadding(10)
-            .tickValues(filterData.map(d => d[0]))
+            .tickValues(labelData)
             .tickSize(-h)
 
         const yAxis = d3.axisLeft(yScale)
@@ -138,46 +128,103 @@ export default function LineGraph({data, y_ID}) {
         return s.substr(s.length - size);
     }
 
+
+    function calculateLabelCount(width) {
+
+        const maxLabels = dataArray.length;
+        const spacing = width / maxLabels;
+
+        return (
+            spacing > 50 ? maxLabels
+            :   spacing > 30 ? Math.floor(maxLabels/2)
+            :   spacing > 15 ? Math.floor(maxLabels/4)
+            :   Math.floor(maxLabels/6)
+        );
+    }
+
     // Reduces or increases the number of rendered data-points and axis labels
     // based on the width of the svg
-    const variableTicks = (width, timeCount, xScale) => {
+    const variableTicks = (count, dateMinMax) => {
 
-        let prev;
+        let scaling = "", countInterval = 0, mon = 0, day = 0, hour = 0, min = 0, activeYear = 0, activeMon = 0,
+            activeDay = 0, activeHour = 0, activeMin = 0;
 
-        const filterData = dataArray.filter((datum, i) => {
-            if (i > 0) {
-                if (xScale(datum[0]) - xScale(prev) > 50)
-                    return datum;
-            } else {
-                return datum;
+        const minDate = dateMinMax[0];
+        const maxDate = dateMinMax[1];
+        let newMinMax = [];
+
+        let x = 1;
+
+        if (count > d3.timeHour.count(minDate, maxDate)) {
+            scaling = "minute";
+            countInterval = d3.timeMinute.count(minDate, maxDate);
+            activeMin = 1;
+            activeHour = 1;
+            activeDay = 1;
+            activeMon = 1;
+            activeYear = 1;
+            while((x*5) * count < countInterval) {
+                x++;
             }
-            prev = datum[0];
-        })
-
-        /*
-        const spacing = Math.floor(width / timeCount);
-
-        let breakSpace = 55;
-        let counter = 1;
-
-        if (xScaling === "minute" || xScaling === "hour") {
-            while (spacing < breakSpace) {
-                if (counter < 2) counter += 1;
-                else counter += 2;
-                breakSpace = breakSpace/1.8;
-            }
-            return (dataArray.filter((d, i) => i % counter === 0));
+            min = x * 5;
+            newMinMax = [d3.timeMinute.floor(minDate), d3.timeMinute.ceil(maxDate)];
         }
-        if (xScaling === "day") {
-            while (spacing < breakSpace) {
-                if (counter < 2) counter += 1;
-                else counter += 2;
-                breakSpace = breakSpace/1.8;
+
+        else if (count > d3.timeDay.count(minDate, maxDate) && d3.timeDay.count(minDate, maxDate) < 1) {
+            scaling = "hour";
+            countInterval = d3.timeHour.count(minDate, maxDate);
+            activeHour = 1;
+            activeDay = 1;
+            activeMon = 1;
+            activeYear = 1;
+            while(x * count < countInterval) {
+                x++;
             }
-            return (dataArray.filter((d, i) => i % counter === 0));
+            hour = x;
+            newMinMax = [d3.timeHour.floor(minDate), d3.timeHour.ceil(maxDate)];
         }
-*/
-        return filterData;
+
+        else if (count > d3.timeMonth.count(minDate, maxDate) && d3.timeMonth.count(minDate, maxDate) < 1) {
+            scaling = "day";
+            countInterval = d3.timeDay.count(minDate, maxDate);
+            activeDay = 1;
+            activeMon = 1;
+            activeYear = 1;
+            while(x * count < countInterval) {
+                x++;
+            }
+            day = x;
+            newMinMax = [d3.timeDay.floor(minDate), d3.timeDay.ceil(maxDate)];
+        }
+
+        else if (count > d3.timeYear.count(minDate, maxDate)) {
+            scaling = "month";
+            countInterval = d3.timeMonth.count(minDate, maxDate);
+            activeMon = 1;
+            activeYear = 1;
+            while(x * count < countInterval) {
+                x++;
+            }
+            mon = x;
+            newMinMax = [d3.timeMonth.floor(minDate), d3.timeMonth.ceil(maxDate)];
+        }
+
+        let values = new Array(count);
+
+        for (let i=0; i<count; i++) {
+            values[i] = new Date (
+                activeYear * minDate.getFullYear(),
+                activeMon * minDate.getMonth() + (i*mon),
+                activeDay * minDate.getDate() + (i*day),
+                activeHour * minDate.getHours() + (i*hour),
+                activeMin * minDate.getMinutes() + (i*min)
+            )
+        }
+
+        if (newMinMax[1] < d3.max(values))
+            newMinMax[1] = d3.max(values);
+
+        return [values, newMinMax, scaling];
     }
 
     // Formatting for german language
@@ -199,11 +246,11 @@ export default function LineGraph({data, y_ID}) {
         "shortMonths": ["Jan", "Feb", "Mrz", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
     });
 
-    function multiFormat(date) {
+    function multiFormat(date, xScaling) {
         if (xScaling === "minute")
             return locale.format("%-H:%M")(date);
         if (xScaling === "hour")
-            return locale.format("%-H:%M")(date);
+            return locale.format("%-H:00")(date);
         if (xScaling === "day")
             return locale.format("%-d. %b")(date);
         if (xScaling === "month")
