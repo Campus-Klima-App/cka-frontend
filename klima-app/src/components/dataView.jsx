@@ -17,7 +17,7 @@ const useContainerDimensions = (myRef) => {
     return dimensions;
 };
 
-export default function LineGraph({data, y_ID}) {
+export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
 
     let containerRef = useRef(), dotsContainerRef = useRef(), xAxisRef = useRef(), yAxisRef = useRef()
     const tooltip = d3.select("#tooltip");
@@ -25,14 +25,17 @@ export default function LineGraph({data, y_ID}) {
     const {width, height} = useContainerDimensions(containerRef);
     const [dataArray, setDataArray] = useState([]);
     const [dataMinMax, setDataMinMax] = useState([]);
+    const [minDate, setMinDate] = useState(null);
+    const [maxDate, setMaxDate] = useState(null);
 
-    const margin = {left: 40, right: 30, top: 40, bottom: 35};
+    if (!margin)
+        margin = {left: 40, right: 30, top: 40, bottom: 35};
 
     useEffect(() => {
-        if (data == null) return (<div>NO DATA</div>);
         updateData();
     }, [data]);
 
+    // Prepare the incoming data for later use - called when data is changing
     function updateData() {
 
         const getEvery = 1; // Reduction of test data, only for testing purposes
@@ -40,19 +43,37 @@ export default function LineGraph({data, y_ID}) {
         const datArr = data.map(d => [new Date(d.time), d[y_ID]])
             .filter((d, i) => i % getEvery === 0);
 
+        setMinDate(d3.min(datArr, d => d[0]));
+        setMaxDate(d3.max(datArr, d => d[0]));
         setDataArray(datArr);
-        setDataMinMax([0, 30]);
+
+        if (defaultYRange) {
+            let max = 0, min = 0;
+            if (d3.max(data, d => d[y_ID]) > defaultYRange[1])
+                max = Math.ceil(d3.max(data, d => d[y_ID]));
+            else
+                max = defaultYRange[1];
+
+            if (d3.min(data, d => d[y_ID]) < defaultYRange[0])
+                min = Math.floor(d3.min(data, d => d[y_ID]));
+            else
+                min = defaultYRange[0];
+
+            setDataMinMax([min, max]);
+
+        } else
+            setDataMinMax([0, 0]);
+
     }
 
+    // Set all properties for rendering - called when width and/or height is changing
     useEffect(() => {
 
         const w = width - (margin.left + margin.right);
         const h = height - (margin.top + margin.bottom)
 
-
-        const dateMinMax = d3.extent(dataArray, d => d[0]);
-        const count = calculateLabelCount(w);
-        const [labelData, newDateMinMax, xScaling] = variableTicks(count, dateMinMax);
+        const count = calculateTickCount(w);
+        const [labelData, newDateMinMax, xScaling] = variableTicks(count);
 
         const xScale = d3.scaleTime()
             .domain(newDateMinMax)
@@ -114,8 +135,8 @@ export default function LineGraph({data, y_ID}) {
     // Properties for tooltip
     const tooltipContent = (tooltip, datum, dot) => {
         tooltip.text(
-            datum[1] + "°C  - " + new Date(datum[0]).getHours() + ":" +
-            zeroPad(datum[0].getMinutes(), 2) + " Uhr"
+            datum[1] + ` ${unit} | ` + datum[0].toLocaleDateString() + " | " +
+            datum[0].getHours() + ":" + zeroPad(datum[0].getMinutes(), 2) + " Uhr"
         );
         tooltip.style("display", "block");
         d3.select(dot)
@@ -128,32 +149,30 @@ export default function LineGraph({data, y_ID}) {
         return s.substr(s.length - size);
     }
 
-
-    function calculateLabelCount(width) {
+    // Tries to find an appropriate number of x-axis ticks
+    // based on the width and the the amount of data-points
+    function calculateTickCount(width) {
 
         const maxLabels = dataArray.length;
-        const spacing = width / maxLabels;
-
+        const spacing = width / maxLabels
         return (
-            spacing > 50 ? maxLabels
-            :   spacing > 30 ? Math.floor(maxLabels/2)
-            :   spacing > 15 ? Math.floor(maxLabels/4)
+                spacing > 60 ? maxLabels
+            :   spacing > 35 ? Math.floor(maxLabels/2)
+            :   spacing > 10 ? Math.floor(maxLabels/4)
             :   Math.floor(maxLabels/6)
         );
     }
 
-    // Reduces or increases the number of rendered data-points and axis labels
-    // based on the width of the svg
-    const variableTicks = (count, dateMinMax) => {
+    // Tries to find nice x-axis values
+    const variableTicks = (count) => {
 
+        if (count<1) return [[], [], ""];
         let scaling = "", countInterval = 0, mon = 0, day = 0, hour = 0, min = 0, activeYear = 0, activeMon = 0,
             activeDay = 0, activeHour = 0, activeMin = 0;
 
-        const minDate = dateMinMax[0];
-        const maxDate = dateMinMax[1];
-        let newMinMax = [];
+        let newMinMax = []; // Given to d3 as x-scale domain
 
-        let x = 1;
+        let x = 1; // counter for the while loops
 
         if (count > d3.timeHour.count(minDate, maxDate)) {
             scaling = "minute";
@@ -163,14 +182,14 @@ export default function LineGraph({data, y_ID}) {
             activeDay = 1;
             activeMon = 1;
             activeYear = 1;
-            while((x*5) * count < countInterval) {
+            while((x) * count < countInterval) {
                 x++;
             }
-            min = x * 5;
+            min = x;
             newMinMax = [d3.timeMinute.floor(minDate), d3.timeMinute.ceil(maxDate)];
         }
 
-        else if (count > d3.timeDay.count(minDate, maxDate) && d3.timeDay.count(minDate, maxDate) < 1) {
+        else if (count > d3.timeDay.count(minDate, maxDate) && d3.timeDay.count(minDate, maxDate) < 2) {
             scaling = "hour";
             countInterval = d3.timeHour.count(minDate, maxDate);
             activeHour = 1;
@@ -184,7 +203,7 @@ export default function LineGraph({data, y_ID}) {
             newMinMax = [d3.timeHour.floor(minDate), d3.timeHour.ceil(maxDate)];
         }
 
-        else if (count > d3.timeMonth.count(minDate, maxDate) && d3.timeMonth.count(minDate, maxDate) < 1) {
+        else if (count > d3.timeMonth.count(minDate, maxDate) && count > d3.timeWeek.count(minDate, maxDate)) {
             scaling = "day";
             countInterval = d3.timeDay.count(minDate, maxDate);
             activeDay = 1;
@@ -206,7 +225,7 @@ export default function LineGraph({data, y_ID}) {
                 x++;
             }
             mon = x;
-            newMinMax = [d3.timeMonth.floor(minDate), d3.timeMonth.ceil(maxDate)];
+            newMinMax = [d3.timeWeek.floor(minDate), d3.timeWeek.ceil(maxDate)];
         }
 
         let values = new Array(count);
@@ -260,18 +279,15 @@ export default function LineGraph({data, y_ID}) {
     }
 
     return (
-        <div className="svgContainer" ref={containerRef} >
-            <svg height="100%" width="100%" >
+        <div className="svgContainer" ref={containerRef}>
+            <svg height="100%" width="100%">
                 <g transform={`translate(${margin.left},${margin.top})`}>
-                    <text x="-10" y="-20" textAnchor="middle" className="yLabel">°C</text>
-                    <g ref={xAxisRef} className="xAxis">
-                    </g>
-                    <g ref={yAxisRef} className="yAxis">
-                    </g>
-                    <g ref={dotsContainerRef}>
-                    </g >
-                </g >
-            </svg >
-        </div >
+                    <text x="-10" y="-20" textAnchor="middle" className="yLabel">{unit}</text>
+                    <g ref={xAxisRef} className="xAxis" />
+                    <g ref={yAxisRef} className="yAxis" />
+                    <g ref={dotsContainerRef} />
+                </g>
+            </svg>
+        </div>
     );
 }
