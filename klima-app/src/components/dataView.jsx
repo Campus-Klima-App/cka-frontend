@@ -73,6 +73,7 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
         const h = height - (margin.top + margin.bottom)
 
         const count = calculateTickCount(w);
+        if (minDate === null || maxDate === null) return;
         const [labelData, newDateMinMax, xScaling] = variableTicks(count);
 
         const xScale = d3.scaleTime()
@@ -153,95 +154,94 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
     // based on the width and the the amount of data-points
     function calculateTickCount(width) {
 
-        const maxLabels = dataArray.length;
-        const spacing = width / maxLabels
-        return (
-                spacing > 60 ? maxLabels
-            :   spacing > 35 ? Math.floor(maxLabels/2)
-            :   spacing > 10 ? Math.floor(maxLabels/4)
-            :   Math.floor(maxLabels/6)
-        );
+        return Math.floor(width/60);
     }
+
+
+    const minuteTicks = (count) => {
+        let counter = 0;
+
+        while ((maxDate.getMinutes() + counter) % 5 !== 0)
+            counter++;
+        const newMax = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(),
+            maxDate.getHours(), maxDate.getMinutes()+counter);
+        counter = 0;
+        while ((minDate.getMinutes() - counter) % 5 !== 0)
+            counter++;
+        const newMin = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate(),
+            minDate.getHours(), minDate.getMinutes()-counter);
+
+        const newMinMax = [newMin, newMax];
+
+        const timeSpan = d3.timeMinute.count(newMin, newMax);
+        counter = 1;
+        while((counter*5) * count < timeSpan)
+            counter++;
+        const minInterval = counter*5;
+        const newCount = Math.floor(timeSpan/minInterval);
+
+        return [newMinMax, minInterval, newCount]
+    };
+
+    const hourTicks = (count) => {
+
+        const newMinMax = [d3.timeHour.floor(minDate), d3.timeHour.ceil(maxDate)];
+
+        const timeSpan = d3.timeHour.count(newMinMax[0], newMinMax[1]);
+
+        const hourInterval = Math.ceil(timeSpan/count);
+        const newCount = Math.floor(timeSpan/hourInterval);
+        return [newMinMax, hourInterval, newCount]
+    };
+
+
+    const dayTicks = (count) => {
+
+        const newMinMax = [d3.timeDay.floor(minDate), d3.timeDay.ceil(maxDate)];
+
+        const timeSpan = d3.timeDay.count(newMinMax[0], newMinMax[1]);
+
+        const dayInterval = Math.ceil(timeSpan/count);
+        const newCount = Math.floor(timeSpan/dayInterval);
+
+        return [newMinMax, dayInterval, newCount]
+    };
 
     // Tries to find nice x-axis values
     const variableTicks = (count) => {
 
         if (count<1) return [[], [], ""];
-        let scaling = "", countInterval = 0, mon = 0, day = 0, hour = 0, min = 0, activeYear = 0, activeMon = 0,
-            activeDay = 0, activeHour = 0, activeMin = 0;
+        let scaling = "", monInterval = 0, dayInterval = 0, hourInterval = 0, minInterval = 0;
 
-        let newMinMax = []; // Given to d3 as x-scale domain
+        let newMinMax; // Given to d3 as x-scale domain
+        let newCount = 1;
 
-        let x = 1; // counter for the while loops
+        scaling = "minute";
+        [newMinMax, minInterval, newCount] = minuteTicks(count);
 
-        if (count > d3.timeHour.count(minDate, maxDate)) {
-            scaling = "minute";
-            countInterval = d3.timeMinute.count(minDate, maxDate);
-            activeMin = 1;
-            activeHour = 1;
-            activeDay = 1;
-            activeMon = 1;
-            activeYear = 1;
-            while((x) * count < countInterval) {
-                x++;
-            }
-            min = x;
-            newMinMax = [d3.timeMinute.floor(minDate), d3.timeMinute.ceil(maxDate)];
-        }
-
-        else if (count > d3.timeDay.count(minDate, maxDate) && d3.timeDay.count(minDate, maxDate) < 2) {
+        if (minInterval > 60) {
+            minInterval = 0;
             scaling = "hour";
-            countInterval = d3.timeHour.count(minDate, maxDate);
-            activeHour = 1;
-            activeDay = 1;
-            activeMon = 1;
-            activeYear = 1;
-            while(x * count < countInterval) {
-                x++;
+            [newMinMax, hourInterval, newCount] = hourTicks(count);
+
+            if (d3.timeHour.count(newMinMax[0], newMinMax[1]) > 24) {
+                hourInterval = 0;
+                scaling = "day";
+                [newMinMax, dayInterval, newCount] = dayTicks(count);
             }
-            hour = x;
-            newMinMax = [d3.timeHour.floor(minDate), d3.timeHour.ceil(maxDate)];
         }
 
-        else if (count > d3.timeMonth.count(minDate, maxDate) && count > d3.timeWeek.count(minDate, maxDate)) {
-            scaling = "day";
-            countInterval = d3.timeDay.count(minDate, maxDate);
-            activeDay = 1;
-            activeMon = 1;
-            activeYear = 1;
-            while(x * count < countInterval) {
-                x++;
-            }
-            day = x;
-            newMinMax = [d3.timeDay.floor(minDate), d3.timeDay.ceil(maxDate)];
-        }
+        let values = new Array(newCount+1);
 
-        else if (count > d3.timeYear.count(minDate, maxDate)) {
-            scaling = "month";
-            countInterval = d3.timeMonth.count(minDate, maxDate);
-            activeMon = 1;
-            activeYear = 1;
-            while(x * count < countInterval) {
-                x++;
-            }
-            mon = x;
-            newMinMax = [d3.timeWeek.floor(minDate), d3.timeWeek.ceil(maxDate)];
-        }
-
-        let values = new Array(count);
-
-        for (let i=0; i<count; i++) {
+        for (let i=0; i<=newCount; i++) {
             values[i] = new Date (
-                activeYear * minDate.getFullYear(),
-                activeMon * minDate.getMonth() + (i*mon),
-                activeDay * minDate.getDate() + (i*day),
-                activeHour * minDate.getHours() + (i*hour),
-                activeMin * minDate.getMinutes() + (i*min)
+                newMinMax[0].getFullYear(),
+                newMinMax[0].getMonth() + (i*monInterval),
+                newMinMax[0].getDate() + (i*dayInterval),
+                newMinMax[0].getHours() + (i*hourInterval),
+                newMinMax[0].getMinutes() + (i*minInterval)
             )
         }
-
-        if (newMinMax[1] < d3.max(values))
-            newMinMax[1] = d3.max(values);
 
         return [values, newMinMax, scaling];
     }
