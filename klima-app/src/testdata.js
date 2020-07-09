@@ -53,6 +53,6 @@ export const testdata = [
   },
   {
     temperature: 10,
-    time: "2020-05-03T00:00+02:00"
+    time: "2020-06-05T10:12+02:00"
   }
 ]

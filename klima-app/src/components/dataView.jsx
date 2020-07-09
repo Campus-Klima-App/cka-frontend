@@ -17,16 +17,18 @@ const useContainerDimensions = (myRef) => {
     return dimensions;
 };
 
-export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
+export default function DataView({visId, data, y_ID, unit, defaultYRange, margin, activeDot}) {
 
     let containerRef = useRef(), dotsContainerRef = useRef(), xAxisRef = useRef(), yAxisRef = useRef()
     const tooltip = d3.select("#tooltip");
 
     const {width, height} = useContainerDimensions(containerRef);
-    const [dataArray, setDataArray] = useState([]);
-    const [dataMinMax, setDataMinMax] = useState([]);
-    const [minDate, setMinDate] = useState(null);
-    const [maxDate, setMaxDate] = useState(null);
+    const [dataState, setDataState] = useState({
+        dataArray: [],
+        dataMinMax: [],
+        minDate: null,
+        maxDate: null
+    });
 
     if (!margin)
         margin = {left: 40, right: 30, top: 40, bottom: 35};
@@ -43,10 +45,6 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
         const datArr = data.map(d => [new Date(d.time), d[y_ID]])
             .filter((d, i) => i % getEvery === 0);
 
-        setMinDate(d3.min(datArr, d => d[0]));
-        setMaxDate(d3.max(datArr, d => d[0]));
-        setDataArray(datArr);
-
         if (defaultYRange) {
             let max = 0, min = 0;
             if (d3.max(data, d => d[y_ID]) > defaultYRange[1])
@@ -59,119 +57,154 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
             else
                 min = defaultYRange[0];
 
-            setDataMinMax([min, max]);
+            setDataState({
+                dataMinMax: [min, max],
+                dataArray: datArr,
+                minDate: d3.min(datArr, d => d[0]),
+                maxDate: d3.max(datArr, d => d[0])
+            });
 
         } else
-            setDataMinMax([0, 0]);
-
+            setDataState({
+                dataMinMax: [0, 0],
+                dataArray: datArr,
+                minDate: d3.min(datArr, d => d[0]),
+                maxDate: d3.max(datArr, d => d[0])
+            });
     }
 
-    // Set all properties for rendering - called when width and/or height is changing
+    // Update of the d3 graphic - called when width or height of the container is changing
     useEffect(() => {
 
         const w = width - (margin.left + margin.right);
         const h = height - (margin.top + margin.bottom)
 
         const count = calculateTickCount(w);
-        if (minDate === null || maxDate === null) return;
+        if (dataState.minDate === null || dataState.maxDate === null) return;
         const [labelData, newDateMinMax, xScaling] = variableTicks(count);
 
         const xScale = d3.scaleTime()
             .domain(newDateMinMax)
-            .range([20, w])
+            .range([0, w])
 
         const yScale = d3.scaleLinear()
-            .domain(dataMinMax)
+            .domain(dataState.dataMinMax)
             .range([h - 20, 0])
 
         const xAxis = d3.axisBottom(xScale)
             .tickFormat(d => multiFormat(d, xScaling))
-            .tickPadding(10)
+            .tickPadding(0)
             .tickValues(labelData)
-            .tickSize(-h)
 
         const yAxis = d3.axisLeft(yScale)
             .ticks(5)
-            .tickPadding(10)
+            .tickPadding(20)
+            .tickSize(-w)
 
         d3.select(xAxisRef.current)
             .attr("transform", `translate(${0}, ${h})`)
             .call(xAxis)
+            .selectAll('line').remove()
 
         d3.select(yAxisRef.current)
             .call(yAxis)
 
+        d3.selectAll(".domain").remove()
+
         d3.select(dotsContainerRef.current).selectAll("circle")
-            .data(dataArray)
+            .data(dataState.dataArray)
             .join("circle")
-            .attr("cx", d => {
-                return xScale(d[0])
-            })
-            .attr("cy", d => {
-                return yScale(d[1])
-            })
+            .attr("cx", d => xScale(d[0]))
+            .attr("cy", d => yScale(d[1]))
             .attr("r", 5)
             .classed("dot", true)
-            .on("mouseover", d => {
-                tooltipContent(tooltip, d, d3.event.target);
-            })
-            .on("click", d => {
-                tooltipContent(tooltip, d, d3.event.target);
-            })
-            .on("mousemove", () => {
-                tooltip
-                    .style("top", (d3.event.pageY - 70) + "px")
-                    .style("left", (d3.event.pageX - 55) + "px");
-            })
-            .on("mouseout", () => {
-                d3.select(d3.event.target)
-                    .classed("dotSelected", false)
-                tooltip.style("display", "none")
-            })
-
-        tooltip.style("display", "none");
+            .on("mouseover", d => handleDotInfo(d, d3.event.target, xScaling))
+            .on("click", d => handleDotInfo(d, d3.event.target, xScaling))
 
     }, [width, height]);
 
-    // Properties for tooltip
-    const tooltipContent = (tooltip, datum, dot) => {
-        tooltip.text(
-            datum[1] + ` ${unit} | ` + datum[0].toLocaleDateString() + " | " +
-            datum[0].getHours() + ":" + zeroPad(datum[0].getMinutes(), 2) + " Uhr"
-        );
-        tooltip.style("display", "block");
-        d3.select(dot)
-            .classed("dotSelected", true)
-    };
-
-    // Helper function for correct minute representation for one digit
     const zeroPad = (num, size) => {
         let s = "00" + num;
         return s.substr(s.length - size);
     }
 
-    // Tries to find an appropriate number of x-axis ticks
-    // based on the width and the the amount of data-points
-    function calculateTickCount(width) {
+    function handleDotInfo(datum, element, xScaling) {
+        let value_with_unit = datum[1] + " " + unit;
+        if (datum[1] === undefined)
+            value_with_unit = "Keine Daten";
+        if (xScaling === "minute" || xScaling === "hour")
+            activeDot([multiFormat(datum[0] , xScaling) + " Uhr", value_with_unit], element);
+        else {
+            const appendString = " um " + datum[0].getHours() + ":" + zeroPad(datum[0].getMinutes(), 2) + " Uhr";
+            activeDot([multiFormat(datum[0] , "day") + appendString, value_with_unit], element);
+        }
+    }
 
+    // Sets the optimal number of ticks for the given width and needed space per tick-label
+    function calculateTickCount(width) {
         return Math.floor(width/60);
     }
 
+    // Tries to find final time-axis values
+    const variableTicks = (count) => {
 
-    const minuteTicks = (count) => {
+        if (count<1) return [[], [], ""];
+        let scaling, monInterval = 0, dayInterval = 0, hourInterval = 0, minInterval = 0;
+        const minDate = dataState.minDate;
+        const maxDate = dataState.maxDate;
+
+        let axisMinMax; // Given to d3 as x-scale domain
+        let newCount = 1;
+
+        scaling = "minute";
+        [axisMinMax, minInterval, newCount] = minuteTicks(count, minDate, maxDate);
+
+        if (minInterval > 60) {
+            minInterval = 0;
+            scaling = "hour";
+            [axisMinMax, hourInterval, newCount] = hourTicks(count, minDate, maxDate);
+
+            if (d3.timeDay.count(axisMinMax[0], axisMinMax[1]) > 1) {
+                hourInterval = 0;
+                scaling = "day";
+                [axisMinMax, dayInterval, newCount] = dayTicks(count, minDate, maxDate);
+
+                if (dayInterval > 16) {
+                    dayInterval = 0;
+                    scaling = "month";
+                    [axisMinMax, monInterval, newCount] = monthTicks(count, minDate, maxDate);
+                }
+            }
+        }
+
+        const values = new Array(newCount+1);
+        for (let i=0; i<=newCount; i++) {
+            values[i] = new Date (
+                axisMinMax[0].getFullYear(),
+                axisMinMax[0].getMonth() + (i*monInterval),
+                axisMinMax[0].getDate() + (i*dayInterval),
+                axisMinMax[0].getHours() + (i*hourInterval),
+                axisMinMax[0].getMinutes() + (i*minInterval)
+            );
+        }
+
+        return [values, axisMinMax, scaling];
+    }
+
+    // Determines time-axis minimum and maximum as well as the minute step size
+    // and the reduced number of actual drawn ticks
+    const minuteTicks = (count, min, max) => {
         let counter = 0;
 
-        while ((maxDate.getMinutes() + counter) % 5 !== 0)
+        while ((max.getMinutes() + counter) % 5 !== 0)
             counter++;
-        const newMax = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(),
-            maxDate.getHours(), maxDate.getMinutes()+counter);
+        const newMax = new Date(max.getFullYear(), max.getMonth(), max.getDate(),
+            max.getHours(), max.getMinutes()+counter);
         counter = 0;
-        while ((minDate.getMinutes() - counter) % 5 !== 0)
+        while ((min.getMinutes() - counter) % 5 !== 0)
             counter++;
-        const newMin = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate(),
-            minDate.getHours(), minDate.getMinutes()-counter);
-
-        const newMinMax = [newMin, newMax];
+        const newMin = new Date(min.getFullYear(), min.getMonth(), min.getDate(),
+            min.getHours(), min.getMinutes()-counter);
 
         const timeSpan = d3.timeMinute.count(newMin, newMax);
         counter = 1;
@@ -180,71 +213,38 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
         const minInterval = counter*5;
         const newCount = Math.floor(timeSpan/minInterval);
 
-        return [newMinMax, minInterval, newCount]
+        return [[newMin, newMax], minInterval, newCount];
     };
 
-    const hourTicks = (count) => {
-
-        const newMinMax = [d3.timeHour.floor(minDate), d3.timeHour.ceil(maxDate)];
-
+    // Determines time-axis minimum and maximum as well as the hour step size
+    // and the reduced number of actual drawn ticks
+    const hourTicks = (count, min, max) => {
+        const newMinMax = [d3.timeHour.floor(min), d3.timeHour.ceil(max)];
         const timeSpan = d3.timeHour.count(newMinMax[0], newMinMax[1]);
-
         const hourInterval = Math.ceil(timeSpan/count);
         const newCount = Math.floor(timeSpan/hourInterval);
-        return [newMinMax, hourInterval, newCount]
+        return [newMinMax, hourInterval, newCount];
     };
 
-
-    const dayTicks = (count) => {
-
-        const newMinMax = [d3.timeDay.floor(minDate), d3.timeDay.ceil(maxDate)];
-
+    // Determines time-axis minimum and maximum as well as the day step size
+    // and the reduced number of actual drawn ticks
+    const dayTicks = (count, min, max) => {
+        const newMinMax = [d3.timeDay.floor(min), d3.timeDay.ceil(max)];
         const timeSpan = d3.timeDay.count(newMinMax[0], newMinMax[1]);
-
         const dayInterval = Math.ceil(timeSpan/count);
         const newCount = Math.floor(timeSpan/dayInterval);
-
-        return [newMinMax, dayInterval, newCount]
+        return [newMinMax, dayInterval, newCount];
     };
 
-    // Tries to find nice x-axis values
-    const variableTicks = (count) => {
-
-        if (count<1) return [[], [], ""];
-        let scaling = "", monInterval = 0, dayInterval = 0, hourInterval = 0, minInterval = 0;
-
-        let newMinMax; // Given to d3 as x-scale domain
-        let newCount = 1;
-
-        scaling = "minute";
-        [newMinMax, minInterval, newCount] = minuteTicks(count);
-
-        if (minInterval > 60) {
-            minInterval = 0;
-            scaling = "hour";
-            [newMinMax, hourInterval, newCount] = hourTicks(count);
-
-            if (d3.timeHour.count(newMinMax[0], newMinMax[1]) > 24) {
-                hourInterval = 0;
-                scaling = "day";
-                [newMinMax, dayInterval, newCount] = dayTicks(count);
-            }
-        }
-
-        let values = new Array(newCount+1);
-
-        for (let i=0; i<=newCount; i++) {
-            values[i] = new Date (
-                newMinMax[0].getFullYear(),
-                newMinMax[0].getMonth() + (i*monInterval),
-                newMinMax[0].getDate() + (i*dayInterval),
-                newMinMax[0].getHours() + (i*hourInterval),
-                newMinMax[0].getMinutes() + (i*minInterval)
-            )
-        }
-
-        return [values, newMinMax, scaling];
-    }
+    // Determines time-axis minimum and maximum as well as the month step size
+    // and the reduced number of actual drawn ticks
+    const monthTicks = (count, min, max) => {
+        const newMinMax = [d3.timeMonth.floor(min), d3.timeMonth.ceil(max)];
+        const timeSpan = d3.timeMonth.count(newMinMax[0], newMinMax[1]);
+        const monthInterval = Math.ceil(timeSpan/count);
+        const newCount = Math.floor(timeSpan/monthInterval);
+        return [newMinMax, monthInterval, newCount];
+    };
 
     // Formatting for german language
     d3.formatDefaultLocale({
@@ -269,7 +269,7 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
         if (xScaling === "minute")
             return locale.format("%-H:%M")(date);
         if (xScaling === "hour")
-            return locale.format("%-H:00")(date);
+            return locale.format("%-H:%M")(date);
         if (xScaling === "day")
             return locale.format("%-d. %b")(date);
         if (xScaling === "month")
@@ -282,7 +282,7 @@ export default function DataView({data, y_ID, unit, defaultYRange, margin}) {
         <div className="svgContainer" ref={containerRef}>
             <svg height="100%" width="100%">
                 <g transform={`translate(${margin.left},${margin.top})`}>
-                    <text x="-10" y="-20" textAnchor="middle" className="yLabel">{unit}</text>
+                    <text x="-30" y="-20" textAnchor="middle" className="yLabel">{unit}</text>
                     <g ref={xAxisRef} className="xAxis" />
                     <g ref={yAxisRef} className="yAxis" />
                     <g ref={dotsContainerRef} />

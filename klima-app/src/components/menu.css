@@ -1,67 +1,67 @@
 .menu {
     position: fixed;
-    left: 0;
-    width: 80px;
-    height: 100%;
-    flex-direction: column;
+    bottom: 0;
+    height: 80px;
+    width: 100%;
+    flex-direction: row;
     user-select: none;
     display: flex;
     justify-content: center;
-    background: #42599f;
+    background: #ffffff;
+    border-top: 1px solid #dbdbdb;
 }
 
 .menuList {
     margin: 0;
     list-style: none;
     display: flex;
-    width: 100%;
+    width: auto;
+    flex-direction: row;
     min-height: 40%;
     justify-content: space-between;
     align-items: center;
-    flex-direction: column;
 }
 
 .menuList li {
-    display: block;
+
+    justify-content: center;
     cursor: pointer;
     height: 55px;
-    width: 55px;
+    width: 100%;
     opacity: 0.8;
-    margin: 10px 0;
-
+    display: inline-block;
+    margin: 0 10px;
 }
 
-li.activeEntry {
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    opacity: 1;
+.activeEntry .modeImg {
+    filter: none;
 }
 
 .modeImg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+    width: 55px;
+    height: 55px;
     padding: 10px;
-    filter: brightness(1000%);
+    filter: grayscale(100%) brightness(140%);
 }
 
-@media (max-width: 500px){
+@media (max-height: 500px) and (min-width: 600px){
     .menu {
-        bottom: 0;
-        height: 80px;
-        width: 100%;
-        flex-direction: row;
+        left: 0;
+        width: 80px;
+        height: 100%;
+        flex-direction: column;
+        border-top: none;
+        border-right: 1px solid #dbdbdb;
     }
 
     .menuList {
-        height: 100%;
-        width: auto;
-        flex-direction: row;
+        width: 100%;
+        flex-direction: column;
+
     }
 
     .menuList li {
-        display: inline-block;
-        margin: 0 10px;
+        display: flex;
+        margin: 10px 0;
     }
 }
