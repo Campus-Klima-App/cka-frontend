@@ -12,45 +12,49 @@ import UV_Icon from '../icons/UV_Icon.svg';
 
 function App() {
 
-    const [activeEntry, setActiveEntry] = useState(null);
-    const [activeDot, setActiveDot] = useState(null);
-    const [entries] = useState([
-        {id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon},
-        {id: 1, name: "Temperatur", icon: Temp_Icon},
-        {id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon},
-        {id: 4, name: "UV-Index", icon: UV_Icon}
-    ]);
-    const [allowFetch, setAllowFetch] = useState(true);
-    const [data, setData] = useState(null);
+    const [state, setState] = useState({
+        activeEntry: null,
+        activeDot: null,
+        entries: [
+            {id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon},
+            {id: 1, name: "Temperatur", icon: Temp_Icon},
+            {id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon},
+            {id: 4, name: "UV-Index", icon: UV_Icon}
+        ],
+        data: null,
+        allowFetch: true
+    });
 
-    if (allowFetch) {
+    if (state.allowFetch) {
         d3.json("https://gist.githubusercontent.com/mickey175/bb19eff9e1625f9db89b68cff9cb5aed/raw/f710ad6374e04fc5bcaf69852a34fd9c35f6831c/data.json")
-            .then(d => setData(d));
-        //setData(testdata);
-        setAllowFetch(false);
+            .then(d => setState(prevState => ({...prevState, data: d})));
+        setState(prevState => ({...prevState, allowFetch: false}));
     }
 
     const handleActiveDot = (dat, el) => {
-        setActiveDot(prevState => {
-            if (prevState !== null)
-                prevState.element.classList.remove("dotSelected");
+        setState(prevState => {
+            if (prevState.activeDot !== null)
+                prevState.activeDot.element.classList.remove("dotSelected");
             el.classList.add("dotSelected");
-            return {
-                datum: dat,
-                element: el
-            };
+            return ({
+                ...prevState,
+                activeDot: {
+                    datum: dat,
+                    element: el
+                }
+            });
         });
     }
 
     const switchVis = () => {
-        if (activeEntry === null) return;
-        const id = activeEntry.id;
+        if (state.activeEntry === null) return;
+        const id = state.activeEntry.id;
         if (id === 0) return (
             <div className="vis">
                 <DataView
-                    key={activeEntry.name}
+                    key={state.activeEntry.name}
                     visId={id}
-                    data={data}
+                    data={state.data}
                     y_ID="co" // the property name in the raw data
                     unit="ppm" // y-axis label
                     defaultYRange={[0, 300]}
@@ -63,12 +67,12 @@ function App() {
             <div className="vis">
                 <div>
                     <DataView
-                        key={activeEntry.name}
+                        key={state.activeEntry.name}
                         visId={id}
-                        data={data}
+                        data={state.data}
                         y_ID="temperature" // the property name in the raw data
                         unit="°C" // y-axis label
-                        defaultYRange={[0, 25]}
+                        defaultYRange={[0, 30]}
                         margin={{left: 50, right: 30, top: 40, bottom: 35}}
                         activeDot={handleActiveDot}
                     />
@@ -81,17 +85,16 @@ function App() {
         <div className="App">
             <div id="content">
                 {
-                    activeEntry !== null ?
-                    <header>{activeEntry.name}</header>
+                    state.activeEntry !== null ?
+                    <header>{state.activeEntry.name}</header>
                     : null
                 }
-
                 <div style={{textAlign: "center"}}>
                 {
-                    activeDot ? (
+                    state.activeDot ? (
                         <React.Fragment>
-                            <p>{activeDot.datum[0]}</p>
-                            <span className="graphValue">{activeDot.datum[1]}</span>
+                            <p>{state.activeDot.datum[0]}</p>
+                            <span className="graphValue">{state.activeDot.datum[1]}</span>
                         </React.Fragment>
                     )
                     : null
@@ -99,9 +102,9 @@ function App() {
                 </div>
                 {switchVis()}
             </div>
-            <Menu entries={entries}
-                  active={activeEntry}
-                  select={selection => setActiveEntry(selection)}
+            <Menu entries={state.entries}
+                  active={state.activeEntry}
+                  select={selection => setState(prevState => ({...prevState, activeEntry: selection}))}
             />
         </div>
     );
