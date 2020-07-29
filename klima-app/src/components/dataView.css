@@ -1,0 +1,45 @@
+.svgContainer {
+    width: 100%;
+    height: 250px;
+}
+
+.tick {
+    color: #384756;
+}
+
+.xAxis line {
+    display: none;
+}
+
+.xAxis text {
+    font-weight: bold;
+    fill: #ababab;
+    font-style: italic;
+}
+
+.tick text {
+    font-size: 14px;
+    color: #707070;
+    user-select: none;
+    text-align: center;
+}
+
+.yLabel {
+    fill: #707070;
+    font-size: 18px;
+    user-select: none;
+}
+
+.dot {
+    /*fill: #5e666e;*/
+    fill: #646f7a;
+}
+
+.dotSelected {
+    fill: #ffdc74;
+}
+
+.domain {
+    stroke: #484848;
+    opacity: 0;
+}

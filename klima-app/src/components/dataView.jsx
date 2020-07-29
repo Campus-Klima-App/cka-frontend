@@ -1,9 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from "d3";
+import './dataView.css';
 
-
-
-export default function DataView({visId, data, y_ID, unit, defaultYRange, margin, activeDot}) {
+export default function DataView({visId, data, y_ID, unit, defaultYRange, margin, activeDot, minMax}) {
 
     let containerRef = useRef(), dotsContainerRef = useRef(), xAxisRef = useRef(), yAxisRef = useRef();
     const {width, height} = useContainerDimensions(containerRef);
@@ -19,8 +18,11 @@ export default function DataView({visId, data, y_ID, unit, defaultYRange, margin
 
     // Prepare the incoming data for later use - called when data is changing
     useEffect(() => {
+
+        //Format the data for later use
         const datArr = data.map(d => [new Date(d.time), d[y_ID]]);
 
+        // Determine the minimum and maximum of the Y-axis
         if (defaultYRange) {
             let max = 0, min = 0;
             if (d3.max(data, d => d[y_ID]) > defaultYRange[1])
@@ -39,12 +41,17 @@ export default function DataView({visId, data, y_ID, unit, defaultYRange, margin
             }));
         }
 
+        // tells the parent app the min/max for display
+        minMax(d3.min(data, d => d[y_ID]) + " " + unit, d3.max(data, d => d[y_ID]) + " " + unit);
+
+        // Determine the minimum and maximum of the X-axis
         setState(prevState => ({
             ...prevState,
             dataArray: datArr,
             minDate: d3.min(datArr, d => d[0]),
             maxDate: d3.max(datArr, d => d[0])
         }));
+
     }, [data]);
 
     // Update of the d3 graphic - called when width or height of the container is changing
@@ -67,23 +74,23 @@ export default function DataView({visId, data, y_ID, unit, defaultYRange, margin
 
         const xAxis = d3.axisBottom(xScale)
             .tickFormat(d => multiFormat(d, xScaling))
-            .tickPadding(0)
+            .tickPadding(10)
+            .tickSize(-h)
             .tickValues(labelText)
 
         const yAxis = d3.axisLeft(yScale)
             .ticks(5)
             .tickPadding(20)
-            .tickSize(-w)
 
         d3.select(xAxisRef.current)
             .attr("transform", `translate(${0}, ${h})`)
             .call(xAxis)
-            .selectAll('line').remove()
 
-        d3.select(yAxisRef.current)
+        const yDOM = d3.select(yAxisRef.current)
             .call(yAxis)
 
-        d3.selectAll(".domain").remove()
+        yDOM.selectAll('line').remove();
+        yDOM.select(".domain").remove();
 
         d3.select(dotsContainerRef.current).selectAll("circle")
             .data(state.dataArray)
@@ -102,17 +109,19 @@ export default function DataView({visId, data, y_ID, unit, defaultYRange, margin
         let valueWithUnit = datum[1] + " " + unit;
         if (datum[1] === undefined)
             valueWithUnit = "Keine Daten";
-        if (xScaling === "minute" || xScaling === "hour")
-            activeDot([multiFormat(datum[0] , xScaling) + " Uhr", valueWithUnit], element);
-        else {
-            const appendString = " um " + datum[0].getHours() + ":" + zeroPad(datum[0].getMinutes(), 2) + " Uhr";
-            activeDot([multiFormat(datum[0] , "day") + appendString, valueWithUnit], element);
-        }
+        activeDot(
+           [
+                {
+                    day: multiFormat(datum[0] , "day"),
+                    time: multiFormat(datum[0], "minute")
+                }, valueWithUnit
+            ], element
+        );
     }
 
     // Tries to find final time-axis values and scaling
     const variableTicks = (count) => {
-        if (count<1) return [[], [], ""];
+        if (count < 1) return [[], [], ""];
 
         let scaling, monInterval = 0, dayInterval = 0, hourInterval = 0, minInterval = 0;
         const minDate = state.minDate;
@@ -155,7 +164,7 @@ export default function DataView({visId, data, y_ID, unit, defaultYRange, margin
 
         // values: x-axis label text
         // axisMinMax: x-axis domain (d3)
-        // scaling: string that describes the x-axis format mode > minute, hour, day, month
+        // scaling: string that describes the x-axis format mode: minute, hour, day, month
         return [labelText, axisMinMax, scaling];
     }
 

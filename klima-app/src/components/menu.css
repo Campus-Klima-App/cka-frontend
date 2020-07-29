@@ -7,8 +7,6 @@
     user-select: none;
     display: flex;
     justify-content: center;
-    background: #ffffff;
-    border-top: 1px solid #dbdbdb;
 }
 
 .menuList {
@@ -23,7 +21,6 @@
 }
 
 .menuList li {
-
     justify-content: center;
     cursor: pointer;
     height: 55px;
@@ -33,15 +30,15 @@
     margin: 0 10px;
 }
 
-.activeEntry .modeImg {
-    filter: none;
-}
-
 .modeImg {
     width: 55px;
     height: 55px;
     padding: 10px;
-    filter: grayscale(100%) brightness(140%);
+    filter: opacity(30%);
+}
+
+.activeEntry .modeImg {
+    filter: none;
 }
 
 @media (max-height: 500px) and (min-width: 600px){
@@ -50,14 +47,11 @@
         width: 80px;
         height: 100%;
         flex-direction: column;
-        border-top: none;
-        border-right: 1px solid #dbdbdb;
     }
 
     .menuList {
         width: 100%;
         flex-direction: column;
-
     }
 
     .menuList li {
