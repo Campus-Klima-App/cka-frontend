@@ -22,11 +22,11 @@ CMD ["npm", "start"]
 ## Later in console:
 # docker build -t sample:dev .
 
- docker run \
-     -it \
-     --rm \
-     -v ${PWD}:/app \
-     -v /app/node_modules \
-     -p 80:3000 \
-     -e CHOKIDAR_USEPOLLING=true \
-     sample:dev
+# docker run \
+#     -it \
+#     --rm \
+#     -v ${PWD}:/app \
+#     -v /app/node_modules \
+#     -p 80:3000 \
+#     -e CHOKIDAR_USEPOLLING=true \
+#     sample:dev
