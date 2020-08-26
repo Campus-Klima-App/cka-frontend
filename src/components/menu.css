@@ -1,61 +1,61 @@
 .menu {
-    position: fixed;
-    bottom: 0;
-    height: 80px;
-    width: 100%;
-    flex-direction: row;
-    user-select: none;
-    display: flex;
-    justify-content: center;
+  position: fixed;
+  bottom: 0;
+  height: 80px;
+  width: 100%;
+  flex-direction: row;
+  user-select: none;
+  display: flex;
+  justify-content: center;
 }
 
 .menuList {
-    margin: 0;
-    list-style: none;
-    display: flex;
-    width: auto;
-    flex-direction: row;
-    min-height: 40%;
-    justify-content: space-between;
-    align-items: center;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  width: auto;
+  flex-direction: row;
+  min-height: 40%;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .menuList li {
-    justify-content: center;
-    cursor: pointer;
-    height: 55px;
-    width: 100%;
-    opacity: 0.8;
-    display: inline-block;
-    margin: 0 10px;
+  justify-content: center;
+  cursor: pointer;
+  height: 55px;
+  width: 100%;
+  opacity: 0.8;
+  display: inline-block;
+  margin: 0 10px;
 }
 
 .modeImg {
-    width: 55px;
-    height: 55px;
-    padding: 10px;
-    filter: opacity(30%);
+  width: 55px;
+  height: 55px;
+  padding: 10px;
+  filter: opacity(30%);
 }
 
 .activeEntry .modeImg {
-    filter: none;
+  filter: none;
 }
 
-@media (max-height: 500px) and (min-width: 600px){
-    .menu {
-        left: 0;
-        width: 80px;
-        height: 100%;
-        flex-direction: column;
-    }
+@media (max-height: 500px) and (min-width: 600px) {
+  .menu {
+    left: 0;
+    width: 80px;
+    height: 100%;
+    flex-direction: column;
+  }
 
-    .menuList {
-        width: 100%;
-        flex-direction: column;
-    }
+  .menuList {
+    width: 100%;
+    flex-direction: column;
+  }
 
-    .menuList li {
-        display: flex;
-        margin: 10px 0;
-    }
+  .menuList li {
+    display: flex;
+    margin: 10px 0;
+  }
 }
