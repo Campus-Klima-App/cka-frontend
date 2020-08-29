@@ -22,6 +22,7 @@ export default function DataView({
     dataMinMax: [0, 0],
     minDate: null,
     maxDate: null,
+    error: false
   });
 
   if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
@@ -60,14 +61,11 @@ export default function DataView({
       ...prevState,
       dataArray: datArr,
       minDate: d3.min(datArr, (d) => d[0]),
-      maxDate: d3.max(datArr, (d) => d[0]),
+      maxDate: d3.max(datArr, (d) => d[0])
     }));
   }, [data]);
 
-  // Update of the d3 graphic - called when width or height of the container is changing
-  useEffect(() => {
-    if (state.minDate === null || state.maxDate === null) return;
-
+  function updateD3() {
     const w = width - (margin.left + margin.right);
     const h = height - (margin.top + margin.bottom);
 
@@ -109,9 +107,20 @@ export default function DataView({
       .classed("dot", true)
       .on("mouseover", (d) => handleDotInfo(d, d3.event.target, xScaling))
       .on("click", (d) => handleDotInfo(d, d3.event.target, xScaling));
-  }, [width, height]);
+  }
 
-  function handleDotInfo(datum, element, xScaling) {
+  // Update of the d3 graphic - called when width or height of the container is changing
+  useEffect(() => {
+    if (state.minDate !== undefined && state.maxDate !== undefined && data.length !== 0) {
+      updateD3();
+      setState((prevState => ({...prevState, error: false})));
+    } else {
+      if (data.length === 0)
+        setState((prevState => ({...prevState, error: true})));
+    }
+  }, [width, height, state.dataArray, state.error]);
+
+  function handleDotInfo(datum, element) {
     let valueWithUnit = datum[1] + " " + unit;
     if (datum[1] === undefined) valueWithUnit = "Keine Daten";
     activeDot(
@@ -184,18 +193,24 @@ export default function DataView({
   };
 
   return (
-    <div className="svgContainer" ref={containerRef}>
-      <svg height="100%" width="100%">
-        <g transform={`translate(${margin.left},${margin.top})`}>
-          <text x="-30" y="-20" textAnchor="middle" className="yLabel">
-            {unit}
-          </text>
-          <g ref={xAxisRef} className="xAxis" />
-          <g ref={yAxisRef} className="yAxis" />
-          <g ref={dotsContainerRef} />
-        </g>
-      </svg>
-    </div>
+      <div className="svgContainer" ref={containerRef}>
+        {state.error === false ?
+        <svg height="100%" width="100%">
+          <g transform={`translate(${margin.left},${margin.top})`}>
+            <text x="-30" y="-20" textAnchor="middle" className="yLabel">
+              {unit}
+            </text>
+            <g ref={xAxisRef} className="xAxis" />
+            <g ref={yAxisRef} className="yAxis" />
+            <g ref={dotsContainerRef} />
+          </g>
+        </svg>
+        :
+            <div className="dataError">
+              <p className="center">Für den Zeitraum liegen keine Daten vor</p>
+            </div>
+        }
+      </div>
   );
 }
 
@@ -214,11 +229,6 @@ const useContainerDimensions = (myRef) => {
   }, [myRef]);
   return dimensions;
 };
-
-function zeroPad(num, size) {
-  let s = "00" + num;
-  return s.substr(s.length - size);
-}
 
 // Sets the optimal number of ticks for the given width and needed space per tick-label
 function calculateTickCount(width) {
@@ -332,11 +342,3 @@ const multiFormat = (date, xScaling) => {
   if (xScaling === "year") return locale.format("%Y")(date);
 };
 
-/* Formatting for german language
-d3.formatDefaultLocale({
-    "decimal": ",",
-    "thousands": ".",
-    "grouping": [3],
-    "currency": ["", "\u00a0€"]
-});
- */

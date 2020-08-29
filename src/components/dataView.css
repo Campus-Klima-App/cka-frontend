@@ -43,3 +43,22 @@
   stroke: #484848;
   opacity: 0;
 }
+
+.dataError {
+  width: 100%;
+  height: 100%;
+  padding: 0 10% 0 10%;
+  font-size: 14px;
+}
+
+.dataError p {
+  color: white
+}
+
+.center {
+  position: relative;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

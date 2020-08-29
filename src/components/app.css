@@ -110,3 +110,48 @@ hr {
   margin: 0 auto;
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+#timeSelect {
+  position: relative;
+}
+
+.dateDisplay {
+  height: 40px;
+  width: fit-content;
+  padding: 15px;
+  margin: 0 auto;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.dateDisplay:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dateDisplay span {
+  display: inline-block;
+  text-align: center;
+  user-select: none;
+  color: white;
+}
+
+.react-calendar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 20px auto 0 auto;
+  width: 300px;
+  z-index: 100;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  margin-left: 10px;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  border-color: #5f5f5f transparent transparent transparent;
+}
