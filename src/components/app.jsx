@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
 import "./app.css";
-import { testdata } from "../testdata.js";
-import * as d3 from "d3";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
@@ -37,31 +35,36 @@ function App() {
 
   function fetchData(dateRange) {
     axios
-      .get(
-        "http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/",
-        {
-          headers: {
-            from: dateToString(dateRange[0]),
-            to: dateToString(dateRange[1])
-          }
-        }
-      )
+      .get("http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/", {
+        headers: {
+          from: dateToString(dateRange[0]),
+          to: dateToString(dateRange[1]),
+        },
+      })
       .then((response) => {
         setState((prevState) => ({
           ...prevState,
           data: response.data.datapoints,
         }));
-      });
+        console.log(response.data.datapoints);
+      })
+      .catch((error) => console.log(error));
   }
 
   function dateToString(date) {
+    console.log("convert date: ", date);
     let year = date.getFullYear();
-    let month = date.getMonth()+1;
+    let month = date.getMonth() + 1;
     let day = date.getDate();
     let hour = date.getHours();
     let minutes = date.getMinutes();
-    let timeshift = 2;
-    return `${year}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(hour)}:${zeroPad(minutes)}+0${timeshift}:00`;
+    let timeshift = -date.getTimezoneOffset() / 60;
+    let shiftSign = timeshift < 0 ? "-" : "+";
+    let string = `${year}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(
+      hour
+    )}:${zeroPad(minutes)}${shiftSign}${zeroPad(timeshift)}:00`;
+    console.log(string);
+    return string;
   }
 
   function zeroPad(num) {
@@ -74,6 +77,7 @@ function App() {
       if (prevState.activeDot !== null)
         prevState.activeDot.element.classList.remove("dotSelected");
       el.classList.add("dotSelected");
+      el.parentNode.append(el);
       return {
         ...prevState,
         activeDot: {
@@ -101,14 +105,11 @@ function App() {
 
   const handleDateSelect = (dates) => {
     setState((prevState) => ({ ...prevState, dateRange: dates }));
+    fetchData(dates);
   };
 
   const handleExpandSelector = () => {
-    setState((prevState) => {
-      if (prevState.expandTimeSel)
-        fetchData(state.dateRange);
-      return { ...prevState, expandTimeSel: !prevState.expandTimeSel };
-    });
+    setState((prevState) => ({ ...prevState, expandTimeSel: !prevState.expandTimeSel }));
   };
 
   function showDataView() {
@@ -156,7 +157,7 @@ function App() {
             <div id="logo" />
           </div>
           <div id="timeSelect">
-            <div className="dateDisplay" onClick={handleExpandSelector}>
+            <div className="dateDisplay light-border" onClick={handleExpandSelector}>
               <span>
                 {state.dateRange[0].toLocaleDateString()} -{" "}
                 {state.dateRange[1].toLocaleDateString()}
@@ -174,7 +175,7 @@ function App() {
           </div>
           <div className="vis">{showDataView()}</div>
           <div className="infoArea">
-            <div className="infoBox">
+            <div className="infoBox light-border">
               <table>
                 <tbody>
                   <tr>
@@ -195,13 +196,13 @@ function App() {
                   </tr>
                   <tr className="info-big">
                     <td colSpan="2">
-                      {state.activeDot ? state.activeDot.data[1] : "--"}
+                      {state.activeDot ? state.activeDot.data[1] : "-"}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div className="infoBox text-center">
+            <div className="infoBox infoBox-2 text-center">
               <span className="info-header">Minimum</span>
               <span className="info-value">{state.minMax[0]}</span>
               <span className="info-header">Maximum</span>

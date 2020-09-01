@@ -22,7 +22,7 @@ export default function DataView({
     dataMinMax: [0, 0],
     minDate: null,
     maxDate: null,
-    error: false
+    error: false,
   });
 
   if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
@@ -30,6 +30,7 @@ export default function DataView({
   // Prepare the incoming data for later use - called when data is changing
   useEffect(() => {
     //Format the data for later use
+
     const datArr = data.map((d) => [new Date(d.time), d[y_ID]]);
 
     // Determine the minimum and maximum of the Y-axis
@@ -61,7 +62,7 @@ export default function DataView({
       ...prevState,
       dataArray: datArr,
       minDate: d3.min(datArr, (d) => d[0]),
-      maxDate: d3.max(datArr, (d) => d[0])
+      maxDate: d3.max(datArr, (d) => d[0]),
     }));
   }, [data]);
 
@@ -111,17 +112,30 @@ export default function DataView({
 
   // Update of the d3 graphic - called when width or height of the container is changing
   useEffect(() => {
-    if (state.minDate !== undefined && state.maxDate !== undefined && data.length !== 0) {
+    if (
+      state.minDate !== undefined &&
+      state.maxDate !== undefined &&
+      data.length !== 0
+    ) {
       updateD3();
-      setState((prevState => ({...prevState, error: false})));
+      setState((prevState) => ({ ...prevState, error: false }));
     } else {
       if (data.length === 0)
-        setState((prevState => ({...prevState, error: true})));
+        setState((prevState) => ({ ...prevState, error: true }));
     }
   }, [width, height, state.dataArray, state.error]);
 
+  function zeroPadFloat(num) {
+    let splitted = num.toString().split(".", 2);
+    let afterComma = 0;
+    if (splitted.length > 1) afterComma = splitted[1];
+    let s = "00" + afterComma;
+    let padded = s.substr(s.length - 2);
+    return splitted[0] + "." + padded;
+  }
+
   function handleDotInfo(datum, element) {
-    let valueWithUnit = datum[1] + " " + unit;
+    let valueWithUnit = zeroPadFloat(datum[1]) + " " + unit;
     if (datum[1] === undefined) valueWithUnit = "Keine Daten";
     activeDot(
       [
@@ -140,6 +154,7 @@ export default function DataView({
     if (count < 1) return [[], [], ""];
 
     let scaling,
+      yearInterval = 0,
       monInterval = 0,
       dayInterval = 0,
       hourInterval = 0,
@@ -171,6 +186,13 @@ export default function DataView({
             minDate,
             maxDate
           );
+          if (d3.timeYear.count(axisMinMax[0], axisMinMax[1]) > 1) {
+            [axisMinMax, yearInterval, newCount] = yearTicks(
+              count,
+              minDate,
+              maxDate
+            );
+          }
         }
       }
     }
@@ -178,7 +200,7 @@ export default function DataView({
     const labelText = new Array(newCount + 1);
     for (let i = 0; i <= newCount; i++) {
       labelText[i] = new Date(
-        axisMinMax[0].getFullYear(),
+        axisMinMax[0].getFullYear() + i * yearInterval,
         axisMinMax[0].getMonth() + i * monInterval,
         axisMinMax[0].getDate() + i * dayInterval,
         axisMinMax[0].getHours() + i * hourInterval,
@@ -193,8 +215,8 @@ export default function DataView({
   };
 
   return (
-      <div className="svgContainer" ref={containerRef}>
-        {state.error === false ?
+    <div className="svgContainer" ref={containerRef}>
+      {state.error === false ? (
         <svg height="100%" width="100%">
           <g transform={`translate(${margin.left},${margin.top})`}>
             <text x="-30" y="-20" textAnchor="middle" className="yLabel">
@@ -205,12 +227,12 @@ export default function DataView({
             <g ref={dotsContainerRef} />
           </g>
         </svg>
-        :
-            <div className="dataError">
-              <p className="center">Für den Zeitraum liegen keine Daten vor</p>
-            </div>
-        }
-      </div>
+      ) : (
+        <div className="dataError">
+          <p className="center">Für den Zeitraum liegen keine Daten vor</p>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -289,6 +311,14 @@ const monthTicks = (count, min, max) => {
   return [newMinMax, monthInterval, newCount];
 };
 
+const yearTicks = (count, min, max) => {
+  const newMinMax = [d3.timeYear.floor(min), d3.timeYear.ceil(max)];
+  const timeSpan = d3.timeYear.count(newMinMax[0], newMinMax[1]);
+  const yearInterval = Math.ceil(timeSpan / count);
+  const newCount = Math.floor(timeSpan / yearInterval);
+  return [newMinMax, yearInterval, newCount];
+};
+
 const locale = d3.timeFormatLocale({
   dateTime: "%A, der %e. %B %Y, %X",
   date: "%d.%m.%Y",
@@ -341,4 +371,3 @@ const multiFormat = (date, xScaling) => {
   if (xScaling === "month") return locale.format("%b")(date);
   if (xScaling === "year") return locale.format("%Y")(date);
 };
-

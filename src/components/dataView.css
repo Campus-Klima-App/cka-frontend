@@ -36,7 +36,7 @@
 }
 
 .dotSelected {
-  fill: #ffdc74;
+  fill: #ffffff;
 }
 
 .domain {
@@ -52,7 +52,7 @@
 }
 
 .dataError p {
-  color: white
+  color: white;
 }
 
 .center {
