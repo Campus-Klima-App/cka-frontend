@@ -46,7 +46,7 @@
   width: 200px;
   height: 50px;
   background-repeat: no-repeat;
-  background-image: url("../icons/sensortree_logo.png");
+  background-image: url("../icons/logo.svg");
   background-size: contain;
 }
 
@@ -154,16 +154,13 @@ hr {
   color: white;
 }
 
-@keyframes calendar-slidein {
-  from {
-    opacity: 0;
-    transform: translate(0, 8%) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(0, 8%) scale(1);
-  }
+.triangle {
+  width: 0;
+  height: 0;
+  margin-left: 10px;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  border-color: #ffffff transparent transparent transparent;
 }
 
 .react-calendar {
@@ -181,6 +178,18 @@ hr {
   animation-fill-mode: forwards;
   box-shadow: 0 0 100px -50px rgba(0, 0, 0, 0.8);
   color: #d4d4d4;
+}
+
+@keyframes calendar-slidein {
+  from {
+    opacity: 0;
+    transform: translate(0, 8%) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 8%) scale(1);
+  }
 }
 
 .react-calendar__navigation * {
@@ -239,13 +248,4 @@ hr {
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 5px 0 5px 10px;
   border-radius: 5px;
-}
-
-.triangle {
-  width: 0;
-  height: 0;
-  margin-left: 10px;
-  border-style: solid;
-  border-width: 5px 5px 0 5px;
-  border-color: #ffffff transparent transparent transparent;
 }
