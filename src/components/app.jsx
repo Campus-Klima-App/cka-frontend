@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
 import "./app.css";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import TimeRangePicker from "@wojtekmaj/react-timerange-picker";
 import axios from "axios";
 
 import CO_Icon from "../icons/CO_Icon.svg";
@@ -25,20 +26,23 @@ function App() {
     allowFetch: true,
     minMax: ["-", "-"],
     dateRange: [new Date(), new Date()],
+    timeRange: [null, null],
     expandTimeSel: false,
   });
 
   if (state.allowFetch) {
-    fetchData(state.dateRange);
+    fetchData(state.dateRange, state.timeRange);
     setState((prevState) => ({ ...prevState, allowFetch: false }));
   }
 
-  function fetchData(dateRange) {
+  function fetchData(dateRange, timeRange) {
+    let fromTime = (timeRange === null || timeRange[0] === null) ? "00:00" : timeRange[0];
+    let toTime = (timeRange === null || timeRange[1] === null) ? "23:59" : timeRange[1];
     axios
       .get("http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/", {
         headers: {
-          from: dateToString(dateRange[0]),
-          to: dateToString(dateRange[1]),
+          from: dateToString(dateRange[0], fromTime),
+          to: dateToString(dateRange[1], toTime),
         },
       })
       .then((response) => {
@@ -46,24 +50,17 @@ function App() {
           ...prevState,
           data: response.data.datapoints,
         }));
-        console.log(response.data.datapoints);
       })
-      .catch((error) => console.log(error));
+      .catch();
   }
 
-  function dateToString(date) {
-    console.log("convert date: ", date);
+  function dateToString(date, time) {
     let year = date.getFullYear();
     let month = date.getMonth() + 1;
     let day = date.getDate();
-    let hour = date.getHours();
-    let minutes = date.getMinutes();
     let timeshift = -date.getTimezoneOffset() / 60;
     let shiftSign = timeshift < 0 ? "-" : "+";
-    let string = `${year}-${zeroPad(month)}-${zeroPad(day)}T${zeroPad(
-      hour
-    )}:${zeroPad(minutes)}${shiftSign}${zeroPad(timeshift)}:00`;
-    console.log(string);
+    let string = `${year}-${zeroPad(month)}-${zeroPad(day)}T${time}${shiftSign}${zeroPad(timeshift)}:00`;
     return string;
   }
 
@@ -105,11 +102,19 @@ function App() {
 
   const handleDateSelect = (dates) => {
     setState((prevState) => ({ ...prevState, dateRange: dates }));
-    fetchData(dates);
+    fetchData(dates, state.timeRange);
+  };
+
+  const handleTimeSelect = (times) => {
+    setState((prevState) => ({ ...prevState, timeRange: times }));
+    fetchData(state.dateRange, times);
   };
 
   const handleExpandSelector = () => {
-    setState((prevState) => ({ ...prevState, expandTimeSel: !prevState.expandTimeSel }));
+    setState((prevState) => ({
+      ...prevState,
+      expandTimeSel: !prevState.expandTimeSel,
+    }));
   };
 
   function showDataView() {
@@ -157,7 +162,10 @@ function App() {
             <div id="logo" />
           </div>
           <div id="timeSelect">
-            <div className="dateDisplay light-border" onClick={handleExpandSelector}>
+            <div
+              className="dateDisplay light-border"
+              onClick={handleExpandSelector}
+            >
               <span>
                 {state.dateRange[0].toLocaleDateString()} -{" "}
                 {state.dateRange[1].toLocaleDateString()}
@@ -165,13 +173,20 @@ function App() {
               <div className="triangle"></div>
             </div>
             {state.expandTimeSel ? (
-              <Calendar
-                onChange={handleDateSelect}
-                value={state.dateRange}
-                returnValue="range"
-                selectRange={true}
-              />
+                <Calendar
+                    onChange={handleDateSelect}
+                    value={state.dateRange}
+                    returnValue="range"
+                    selectRange={true}
+                />
             ) : null}
+            <div>
+            <TimeRangePicker
+              onChange={handleTimeSelect}
+              value={state.timeRange}
+              disableClock={true}
+            />
+            </div>
           </div>
           <div className="vis">{showDataView()}</div>
           <div className="infoArea">
@@ -183,7 +198,7 @@ function App() {
                     <td className="info-value space-l-20">
                       {state.activeDot
                         ? state.activeDot.data[0].day
-                        : "Keine Auswahl"}
+                        : ""}
                     </td>
                   </tr>
                   <tr>
@@ -191,12 +206,12 @@ function App() {
                     <td className="info-value space-l-20">
                       {state.activeDot
                         ? state.activeDot.data[0].time + " Uhr"
-                        : "Keine Auswahl"}
+                        : ""}
                     </td>
                   </tr>
                   <tr className="info-big">
                     <td colSpan="2">
-                      {state.activeDot ? state.activeDot.data[1] : "-"}
+                      {state.activeDot ? state.activeDot.data[1] : "--"}
                     </td>
                   </tr>
                 </tbody>

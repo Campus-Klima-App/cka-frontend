@@ -4,28 +4,28 @@
 }
 
 .tick {
-  color: #384756;
+  color: rgba(255, 255, 255, 0.05);
 }
 
 .xAxis line {
-  display: none;
+
 }
 
 .xAxis text {
   font-weight: bold;
-  fill: #ababab;
-  font-style: italic;
 }
 
 .tick text {
   font-size: 14px;
-  color: #707070;
+  color: #fff;
+  opacity: 0.5;
   user-select: none;
   text-align: center;
 }
 
 .yLabel {
-  fill: #707070;
+  fill: #fff;
+  fill-opacity: 0.4;
   font-size: 18px;
   user-select: none;
 }
@@ -36,12 +36,13 @@
 }
 
 .dotSelected {
-  fill: #ffffff;
+  fill: #c5e773;
 }
 
 .domain {
-  stroke: #484848;
-  opacity: 0;
+  stroke: #fff;
+  opacity: 0.1;
+
 }
 
 .dataError {

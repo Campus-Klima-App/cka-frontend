@@ -63,7 +63,7 @@
 .infoBox {
   font-size: 14px;
   width: 250px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   padding: 25px;
   border-radius: 20px;
   text-align: left;
@@ -71,8 +71,7 @@
   box-shadow: 0 5px 30px -20px rgba(0, 0, 0, 0.2);
 }
 
-.infoBox-2
-{
+.infoBox-2 {
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -123,14 +122,18 @@ hr {
 
 #timeSelect {
   position: relative;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .dateDisplay {
   width: fit-content;
   width: -moz-fit-content;
   height: 40px;
+  margin-bottom: 15px;
   padding: 0 10px;
-  margin: 0 auto;
   border-radius: 5px;
   background: rgba(207, 236, 255, 0.1);
   display: flex;
@@ -151,23 +154,22 @@ hr {
   color: white;
 }
 
-@keyframes slidein {
+@keyframes calendar-slidein {
   from {
     opacity: 0;
-    transform: translateX(-50%) scale(0.9);
+    transform: translate(0, 8%) scale(0.9);
   }
 
   to {
     opacity: 1;
-    transform: translateX(-50%) scale(1);
+    transform: translate(0, 8%) scale(1);
   }
 }
 
 .react-calendar {
   position: absolute;
-  left: 50%;
+  transform: translate(-40%, 8%);
   transform-origin: top;
-  transform: translateX(-50%);
   margin: 20px auto 0 auto;
   width: 300px !important;
   z-index: 50;
@@ -175,46 +177,71 @@ hr {
   border-radius: 10px;
   background: #363d43 !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  animation: slidein 0.1s ease-out;
+  animation: calendar-slidein 0.1s ease-out;
   animation-fill-mode: forwards;
   box-shadow: 0 0 100px -50px rgba(0, 0, 0, 0.8);
   color: #d4d4d4;
 }
 
-.react-calendar__navigation *
-{
+.react-calendar__navigation * {
   color: inherit;
 }
 
-.react-calendar__navigation *:hover
-{
+.react-calendar__navigation *:hover {
   background: inherit !important;
 }
 
-.react-calendar__tile
-{
+.react-calendar__tile {
   color: #949494;
 }
 
-.react-calendar__month-view__days__day--weekend
-{
+.react-calendar__month-view__days__day--weekend {
   color: #e76a6a !important;
 }
 
-.react-calendar__month-view__days__day--weekend.react-calendar__tile--active
-{
+.react-calendar__month-view__days__day--weekend.react-calendar__tile--active {
   color: #e76a6a !important;
 }
 
-.react-calendar__tile--active
-{
-  background-color: rgba(190, 93, 93, 0.3) !important;
+.react-calendar__tile--active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
   color: #d0d0d0 !important;
 }
 
-.react-calendar__tile--hover
-{
+.react-calendar__tile--now {
+  background: #b6d274 !important;
+  color: rgb(61, 69, 76) !important;
+}
+
+.react-calendar__tile--now:hover {
+  color: rgb(255, 255, 255) !important;
+}
+
+.react-calendar__tile--hover {
   background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.react-timerange-picker *{
+  color: white;
+}
+
+.react-timerange-picker__range-divider
+{
+  display: none;
+}
+
+.react-timerange-picker__clear-button__icon
+{
+  stroke: white;
+  transition: stroke 0.1s;
+}
+
+.react-timerange-picker__wrapper
+{
+  background: #363d43 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 5px  0  5px 10px;
+  border-radius: 5px;
 }
 
 .triangle {
@@ -223,5 +250,5 @@ hr {
   margin-left: 10px;
   border-style: solid;
   border-width: 5px 5px 0 5px;
-  border-color: #5f5f5f transparent transparent transparent;
+  border-color: #ffffff transparent transparent transparent;
 }

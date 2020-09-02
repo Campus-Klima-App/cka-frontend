@@ -35,10 +35,18 @@
   height: 55px;
   padding: 10px;
   filter: opacity(30%);
+  border-radius: 50%;
 }
 
 .activeEntry .modeImg {
-  filter: none;
+  filter: none !important;
+  background: none !important;
+}
+
+.modeImg:hover {
+  transition: filter 0.2s;
+  background: rgba(255, 255, 255, 0.1);
+  filter: opacity(60%);
 }
 
 @media (max-height: 500px) and (min-width: 600px) {
