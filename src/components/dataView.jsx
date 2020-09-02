@@ -135,7 +135,10 @@ export default function DataView({
   }
 
   function handleDotInfo(datum, element) {
-    let valueWithUnit = datum[1] === undefined ? "Keine Daten" : zeroPadFloat(datum[1]) + " " + unit;
+    let valueWithUnit =
+      datum[1] === undefined
+        ? "Keine Daten"
+        : zeroPadFloat(datum[1]) + " " + unit;
     activeDot(
       [
         {

@@ -36,8 +36,10 @@ function App() {
   }
 
   function fetchData(dateRange, timeRange) {
-    let fromTime = (timeRange === null || timeRange[0] === null) ? "00:00" : timeRange[0];
-    let toTime = (timeRange === null || timeRange[1] === null) ? "23:59" : timeRange[1];
+    let fromTime =
+      timeRange === null || timeRange[0] === null ? "00:00" : timeRange[0];
+    let toTime =
+      timeRange === null || timeRange[1] === null ? "23:59" : timeRange[1];
     axios
       .get("http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/", {
         headers: {
@@ -60,7 +62,9 @@ function App() {
     let day = date.getDate();
     let timeshift = -date.getTimezoneOffset() / 60;
     let shiftSign = timeshift < 0 ? "-" : "+";
-    let string = `${year}-${zeroPad(month)}-${zeroPad(day)}T${time}${shiftSign}${zeroPad(timeshift)}:00`;
+    let string = `${year}-${zeroPad(month)}-${zeroPad(
+      day
+    )}T${time}${shiftSign}${zeroPad(timeshift)}:00`;
     return string;
   }
 
@@ -173,19 +177,19 @@ function App() {
               <div className="triangle"></div>
             </div>
             {state.expandTimeSel ? (
-                <Calendar
-                    onChange={handleDateSelect}
-                    value={state.dateRange}
-                    returnValue="range"
-                    selectRange={true}
-                />
+              <Calendar
+                onChange={handleDateSelect}
+                value={state.dateRange}
+                returnValue="range"
+                selectRange={true}
+              />
             ) : null}
             <div>
-            <TimeRangePicker
-              onChange={handleTimeSelect}
-              value={state.timeRange}
-              disableClock={true}
-            />
+              <TimeRangePicker
+                onChange={handleTimeSelect}
+                value={state.timeRange}
+                disableClock={true}
+              />
             </div>
           </div>
           <div className="vis">{showDataView()}</div>
@@ -196,9 +200,7 @@ function App() {
                   <tr>
                     <td className="info-header">Datum</td>
                     <td className="info-value space-l-20">
-                      {state.activeDot
-                        ? state.activeDot.data[0].day
-                        : ""}
+                      {state.activeDot ? state.activeDot.data[0].day : ""}
                     </td>
                   </tr>
                   <tr>
