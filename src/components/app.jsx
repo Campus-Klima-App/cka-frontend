@@ -15,8 +15,8 @@ function App() {
   const [pages] = useState([
     { id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon },
     { id: 1, name: "Temperatur", icon: Temp_Icon },
-    { id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon },
-    { id: 4, name: "UV-Index", icon: UV_Icon },
+    { id: 2, name: "Luftfeuchtigkeit", icon: Humid_Icon },
+    //{ id: 3, name: "UV-Index", icon: UV_Icon }, UV is only necesarry if a Sensor is installed
   ]);
   const [activePage, setActivePage] = useState(null);
   const [data, setData] = useState(null);
@@ -44,8 +44,8 @@ function App() {
           to: dateToString(dateRange[1], toTime),
         },
       })
-      .then((response) => setData(response.data.datapoints))
-      .catch();
+        .then((response) => setData(response.data.datapoints))
+        .catch();
   }
 
   function dateToString(date, time) {
