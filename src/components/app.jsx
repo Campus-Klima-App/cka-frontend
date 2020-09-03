@@ -147,6 +147,20 @@ function App() {
           minMax={handleMinMax}
         />
       );
+    else if (id === 2)
+      return (
+          <DataView
+              key={state.activePage.name}
+              visId={id}
+              data={state.data}
+              y_ID="humidity" // the property name in the raw data
+              unit="%" // y-axis label
+              defaultYRange={[0, 30]}
+              margin={{ left: 50, right: 30, top: 40, bottom: 35 }}
+              activeDot={handleActiveDot}
+              minMax={handleMinMax}
+          />
+      );
   }
 
   return (
