@@ -3,7 +3,6 @@ import * as d3 from "d3";
 import "./dataView.css";
 
 export default function DataView({
-  visId,
   data,
   y_ID,
   unit,
@@ -23,27 +22,27 @@ export default function DataView({
     minDate: null,
     maxDate: null,
     error: false,
+    activeDotElement: null
   });
 
   if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
 
-  // Prepare the incoming data for later use - called when data is changing
+  // Reaction to change in data
   useEffect(() => {
-    //Format the data for later use
-
+    // Format the data for later use
     const datArr = data.map((d) => [new Date(d.time), d[y_ID]]);
 
-    // Determine the minimum and maximum of the Y-axis
+    // Set the minimum and maximum of the Y-axis
     if (defaultYRange) {
-      let max = 0,
-        min = 0;
-      if (d3.max(data, (d) => d[y_ID]) > defaultYRange[1])
-        max = Math.ceil(d3.max(data, (d) => d[y_ID]));
-      else max = defaultYRange[1];
+      let min =
+        d3.min(data, (d) => d[y_ID]) < defaultYRange[0]
+          ? Math.floor(d3.min(data, (d) => d[y_ID]))
+          : defaultYRange[0];
 
-      if (d3.min(data, (d) => d[y_ID]) < defaultYRange[0])
-        min = Math.floor(d3.min(data, (d) => d[y_ID]));
-      else min = defaultYRange[0];
+      let max =
+        d3.max(data, (d) => d[y_ID]) > defaultYRange[1]
+          ? Math.ceil(d3.max(data, (d) => d[y_ID]))
+          : defaultYRange[1];
 
       setState((prevState) => ({
         ...prevState,
@@ -51,20 +50,37 @@ export default function DataView({
       }));
     }
 
-    // tells the parent app the min/max for display
-    minMax(
-      d3.min(data, (d) => d[y_ID]) + " " + unit,
-      d3.max(data, (d) => d[y_ID]) + " " + unit
-    );
-
-    // Determine the minimum and maximum of the X-axis
+    // Set the minimum and maximum of the X-axis
     setState((prevState) => ({
       ...prevState,
       dataArray: datArr,
       minDate: d3.min(datArr, (d) => d[0]),
       maxDate: d3.max(datArr, (d) => d[0]),
     }));
+
+    // return the min and max to the parent app for display
+    minMax(
+      d3.min(data, (d) => d[y_ID]) + " " + unit,
+      d3.max(data, (d) => d[y_ID]) + " " + unit
+    );
   }, [data]);
+
+  // Update of the d3 graphic - called when width or height of the container is changing
+  useEffect(() => {
+    if (
+      state.minDate !== undefined &&
+      state.maxDate !== undefined &&
+      data.length !== 0
+    ) {
+      updateD3();
+      setState((prevState) => ({ ...prevState, error: false }));
+    } else {
+      if (data.length === 0)
+        setState((prevState) => ({ ...prevState, error: true }));
+    }
+  }, [width, height, state.dataArray, state.error]);
+
+  // START OF MAIN RENDERING FUNCTION ==============================================================
 
   function updateD3() {
     const w = width - (margin.left + margin.right);
@@ -96,7 +112,7 @@ export default function DataView({
     const yDOM = d3.select(yAxisRef.current).call(yAxis);
 
     yDOM.selectAll("line").remove();
-    yDOM.select(".domain").remove();
+    //yDOM.select(".domain").remove();
 
     d3.select(dotsContainerRef.current)
       .selectAll("circle")
@@ -108,22 +124,12 @@ export default function DataView({
       .classed("dot", true)
       .on("mouseover", (d) => handleDotInfo(d, d3.event.target, xScaling))
       .on("click", (d) => handleDotInfo(d, d3.event.target, xScaling));
+
+    if (state.activeDotElement !== null && state.activeDotElement.parentNode !== null)
+      state.activeDotElement.parentNode.append(state.activeDotElement);
   }
 
-  // Update of the d3 graphic - called when width or height of the container is changing
-  useEffect(() => {
-    if (
-      state.minDate !== undefined &&
-      state.maxDate !== undefined &&
-      data.length !== 0
-    ) {
-      updateD3();
-      setState((prevState) => ({ ...prevState, error: false }));
-    } else {
-      if (data.length === 0)
-        setState((prevState) => ({ ...prevState, error: true }));
-    }
-  }, [width, height, state.dataArray, state.error]);
+  // END OF MAIN RENDERING FUNCTION ==============================================================
 
   function zeroPadFloat(num) {
     let splitted = num.toString().split(".", 2);
@@ -135,8 +141,10 @@ export default function DataView({
   }
 
   function handleDotInfo(datum, element) {
-    let valueWithUnit = zeroPadFloat(datum[1]) + " " + unit;
-    if (datum[1] === undefined) valueWithUnit = "Keine Daten";
+    let valueWithUnit =
+      datum[1] === undefined
+        ? "Keine Daten"
+        : zeroPadFloat(datum[1]) + " " + unit;
     activeDot(
       [
         {
@@ -147,10 +155,14 @@ export default function DataView({
       ],
       element
     );
+    setState((prevState) => ({
+      ...prevState,
+      activeDotElement: element,
+    }));
   }
 
   // Tries to find final time-axis values and scaling
-  const variableTicks = (count) => {
+  function variableTicks(count) {
     if (count < 1) return [[], [], ""];
 
     let scaling,
@@ -207,12 +219,8 @@ export default function DataView({
         axisMinMax[0].getMinutes() + i * minInterval
       );
     }
-
-    // values: x-axis label text
-    // axisMinMax: x-axis domain (d3)
-    // scaling: string that describes the x-axis format mode: minute, hour, day, month
     return [labelText, axisMinMax, scaling];
-  };
+  }
 
   return (
     <div className="svgContainer" ref={containerRef}>
