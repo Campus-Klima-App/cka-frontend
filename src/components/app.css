@@ -1,3 +1,23 @@
+/* GENERAL ======================================= */
+
+.light-border {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.space-l-20 {
+  padding-left: 20px;
+}
+
+.space-l-60 {
+  padding-left: 60px !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ============================================================ */
+
 .app {
   position: absolute;
   width: 100%;
@@ -15,12 +35,6 @@
   overflow-x: hidden;
 }
 
-#wrapper {
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
 @media (max-height: 500px) and (min-width: 600px) {
   #content {
     bottom: 0;
@@ -28,9 +42,10 @@
   }
 }
 
-.vis {
+#wrapper {
   width: 100%;
-  padding: 10px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 #logoBar {
@@ -50,76 +65,6 @@
   background-size: contain;
 }
 
-.infoArea {
-  width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  z-index: -1;
-}
-
-.infoBox {
-  font-size: 14px;
-  width: 250px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 25px;
-  border-radius: 20px;
-  text-align: left;
-  margin: 10px;
-  box-shadow: 0 5px 30px -20px rgba(0, 0, 0, 0.2);
-}
-
-.infoBox-2 {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.infoBox table {
-  width: 100%;
-}
-
-.infoBox span {
-  display: block;
-}
-
-.info-header {
-  color: #6d7072;
-}
-
-.info-value {
-  color: #ababab;
-}
-
-.info-big {
-  text-align: center;
-  color: white;
-  font-size: 30px;
-}
-
-.info-big td {
-  padding-top: 10px;
-}
-
-.space-l-20 {
-  padding-left: 20px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.light-border {
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-hr {
-  position: static;
-  width: 40%;
-  margin: 0 auto;
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
 #timeSelect {
   position: relative;
   margin: 0 auto;
@@ -128,7 +73,9 @@ hr {
   align-items: center;
 }
 
-.dateDisplay {
+/* DATE-SELECTION BUTTON ======================================= */
+
+.dateSelect {
   width: fit-content;
   width: -moz-fit-content;
   height: 40px;
@@ -142,11 +89,11 @@ hr {
   z-index: 100;
 }
 
-.dateDisplay:hover {
+.dateSelect:hover {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.dateDisplay span {
+.dateSelect span {
   display: inline-block;
   white-space: nowrap;
   text-align: center;
@@ -163,6 +110,8 @@ hr {
   border-color: #ffffff transparent transparent transparent;
 }
 
+/* CALENDAR COMPONENT ======================================= */
+
 .react-calendar {
   position: absolute;
   transform: translate(-40%, 8%);
@@ -178,18 +127,6 @@ hr {
   animation-fill-mode: forwards;
   box-shadow: 0 0 100px -50px rgba(0, 0, 0, 0.8);
   color: #d4d4d4;
-}
-
-@keyframes calendar-slidein {
-  from {
-    opacity: 0;
-    transform: translate(0, 8%) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(0, 8%) scale(1);
-  }
 }
 
 .react-calendar__navigation * {
@@ -230,6 +167,20 @@ hr {
   background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
+@keyframes calendar-slidein {
+  from {
+    opacity: 0;
+    transform: translate(0, 8%) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 8%) scale(1);
+  }
+}
+
+/* TIME-RANGE COMPONENT ======================================= */
+
 .react-timerange-picker * {
   color: white;
 }
@@ -248,4 +199,64 @@ hr {
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 5px 0 5px 10px;
   border-radius: 5px;
+}
+
+/* DATA VIEW WRAPPER ======================================= */
+
+.dataView-wrapper {
+  width: 100%;
+  padding: 10px 20px;
+}
+
+/* INFO AREA AND CARDS ======================================= */
+
+.infoArea {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: -1;
+}
+
+.infoCard {
+  font-size: 14px;
+  width: 250px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 20px;
+  text-align: left;
+  margin: 10px;
+  box-shadow: 0 5px 30px -20px rgba(0, 0, 0, 0.2);
+}
+
+.infoCard-dark {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.infoCard table {
+  width: 100%;
+}
+
+.infoCard span {
+  display: block;
+}
+
+.infoCard-header {
+  color: #6d7072;
+}
+
+.infoCard-value {
+  color: #ababab;
+}
+
+.infoCard-value-big {
+  text-align: center;
+  color: white;
+  font-size: 30px;
+}
+
+.infoCard-value-big td {
+  padding-top: 10px;
 }

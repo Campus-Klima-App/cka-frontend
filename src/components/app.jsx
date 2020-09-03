@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
-import "./app.css";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
 import TimeRangePicker from "@wojtekmaj/react-timerange-picker";
 import axios from "axios";
+
+import "./app.css";
+import "react-calendar/dist/Calendar.css";
 
 import CO_Icon from "../icons/CO_Icon.svg";
 import Temp_Icon from "../icons/Temp_Icon.svg";
@@ -14,19 +15,35 @@ import UV_Icon from "../icons/UV_Icon.svg";
 
 function App() {
   const [state, setState] = useState({
-    activePage: null,
-    activeDot: null,
     pages: [
-      { id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon },
-      { id: 1, name: "Temperatur", icon: Temp_Icon },
-      { id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon },
-      { id: 4, name: "UV-Index", icon: UV_Icon },
+      {
+        id: 0,
+        name: "Kohlenstoffmonoxid",
+        icon: CO_Icon,
+      },
+      {
+        id: 1,
+        name: "Temperatur",
+        icon: Temp_Icon,
+      },
+      {
+        id: 3,
+        name: "Luftfeuchtigkeit",
+        icon: Humid_Icon,
+      },
+      {
+        id: 4,
+        name: "UV-Index",
+        icon: UV_Icon,
+      },
     ],
     data: null,
-    allowFetch: true,
+    activePage: null,
+    activeDot: null,
     minMax: ["-", "-"],
     dateRange: [new Date(), new Date()],
     timeRange: [null, null],
+    allowFetch: true,
     expandTimeSel: false,
   });
 
@@ -104,22 +121,22 @@ function App() {
     }));
   }
 
-  const handleDateSelect = (dates) => {
+  function handleDateSelect(dates) {
     setState((prevState) => ({ ...prevState, dateRange: dates }));
     fetchData(dates, state.timeRange);
-  };
+  }
 
-  const handleTimeSelect = (times) => {
+  function handleTimeSelect(times) {
     setState((prevState) => ({ ...prevState, timeRange: times }));
     fetchData(state.dateRange, times);
-  };
+  }
 
-  const handleExpandSelector = () => {
+  function handleExpandSelector() {
     setState((prevState) => ({
       ...prevState,
       expandTimeSel: !prevState.expandTimeSel,
     }));
-  };
+  }
 
   function showDataView() {
     if (state.activePage === null) {
@@ -128,11 +145,11 @@ function App() {
     }
     const id = state.activePage.id;
     if (state.data === null) return;
+
     if (id === 0)
       return (
         <DataView
           key={state.activePage.name}
-          visId={id}
           data={state.data}
           y_ID="co" // the property name in the raw data
           unit="ppm" // y-axis label
@@ -146,11 +163,10 @@ function App() {
       return (
         <DataView
           key={state.activePage.name}
-          visId={id}
           data={state.data}
           y_ID="temperature" // the property name in the raw data
           unit="°C" // y-axis label
-          defaultYRange={[0, 30]}
+          defaultYRange={[0, 20]}
           margin={{ left: 50, right: 30, top: 40, bottom: 35 }}
           activeDot={handleActiveDot}
           minMax={handleMinMax}
@@ -167,14 +183,14 @@ function App() {
           </div>
           <div id="timeSelect">
             <div
-              className="dateDisplay light-border"
+              className="dateSelect light-border"
               onClick={handleExpandSelector}
             >
               <span>
                 {state.dateRange[0].toLocaleDateString()} -{" "}
                 {state.dateRange[1].toLocaleDateString()}
               </span>
-              <div className="triangle"></div>
+              <div className="triangle" />
             </div>
             {state.expandTimeSel ? (
               <Calendar
@@ -192,26 +208,26 @@ function App() {
               />
             </div>
           </div>
-          <div className="vis">{showDataView()}</div>
+          <div className="dataView-wrapper">{showDataView()}</div>
           <div className="infoArea">
-            <div className="infoBox light-border">
+            <div className="infoCard light-border">
               <table>
                 <tbody>
                   <tr>
-                    <td className="info-header">Datum</td>
-                    <td className="info-value space-l-20">
+                    <td className="infoCard-header">Datum</td>
+                    <td className="infoCard-value space-l-20">
                       {state.activeDot ? state.activeDot.data[0].day : ""}
                     </td>
                   </tr>
                   <tr>
-                    <td className="info-header">Uhrzeit</td>
-                    <td className="info-value space-l-20">
+                    <td className="infoCard-header">Uhrzeit</td>
+                    <td className="infoCard-value space-l-20">
                       {state.activeDot
                         ? state.activeDot.data[0].time + " Uhr"
                         : ""}
                     </td>
                   </tr>
-                  <tr className="info-big">
+                  <tr className="infoCard-value-big">
                     <td colSpan="2">
                       {state.activeDot ? state.activeDot.data[1] : "--"}
                     </td>
@@ -219,11 +235,11 @@ function App() {
                 </tbody>
               </table>
             </div>
-            <div className="infoBox infoBox-2 text-center">
-              <span className="info-header">Minimum</span>
-              <span className="info-value">{state.minMax[0]}</span>
-              <span className="info-header">Maximum</span>
-              <span className="info-value">{state.minMax[1]}</span>
+            <div className="infoCard infoCard-dark space-l-60">
+              <span className="infoCard-header">Minimum</span>
+              <span className="infoCard-value">{state.minMax[0]}</span>
+              <span className="infoCard-header">Maximum</span>
+              <span className="infoCard-value">{state.minMax[1]}</span>
             </div>
           </div>
         </div>
