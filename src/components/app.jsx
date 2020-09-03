@@ -4,52 +4,32 @@ import Menu from "./menu";
 import Calendar from "react-calendar";
 import TimeRangePicker from "@wojtekmaj/react-timerange-picker";
 import axios from "axios";
-
 import "./app.css";
 import "react-calendar/dist/Calendar.css";
-
 import CO_Icon from "../icons/CO_Icon.svg";
 import Temp_Icon from "../icons/Temp_Icon.svg";
 import Humid_Icon from "../icons/Humid_Icon.svg";
 import UV_Icon from "../icons/UV_Icon.svg";
 
 function App() {
-  const [state, setState] = useState({
-    pages: [
-      {
-        id: 0,
-        name: "Kohlenstoffmonoxid",
-        icon: CO_Icon,
-      },
-      {
-        id: 1,
-        name: "Temperatur",
-        icon: Temp_Icon,
-      },
-      {
-        id: 3,
-        name: "Luftfeuchtigkeit",
-        icon: Humid_Icon,
-      },
-      {
-        id: 4,
-        name: "UV-Index",
-        icon: UV_Icon,
-      },
-    ],
-    data: null,
-    activePage: null,
-    activeDot: null,
-    minMax: ["-", "-"],
-    dateRange: [new Date(), new Date()],
-    timeRange: [null, null],
-    allowFetch: true,
-    expandTimeSel: false,
-  });
+  const [pages] = useState([
+    { id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon },
+    { id: 1, name: "Temperatur", icon: Temp_Icon },
+    { id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon },
+    { id: 4, name: "UV-Index", icon: UV_Icon },
+  ]);
+  const [activePage, setActivePage] = useState(null);
+  const [data, setData] = useState(null);
+  const [allowDataFetch, setAllowDataFetch] = useState(true);
+  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [timeRange, setTimeRange] = useState([null, null]);
+  const [minMax, setMinMax] = useState(["-", "-"]);
+  const [activeDot, setActiveDot] = useState(null);
+  const [expandTimeSel, setExpandTimeSel] = useState(false);
 
-  if (state.allowFetch) {
-    fetchData(state.dateRange, state.timeRange);
-    setState((prevState) => ({ ...prevState, allowFetch: false }));
+  if (allowDataFetch) {
+    fetchData(dateRange, timeRange);
+    setAllowDataFetch(false);
   }
 
   function fetchData(dateRange, timeRange) {
@@ -64,12 +44,7 @@ function App() {
           to: dateToString(dateRange[1], toTime),
         },
       })
-      .then((response) => {
-        setState((prevState) => ({
-          ...prevState,
-          data: response.data.datapoints,
-        }));
-      })
+      .then((response) => setData(response.data.datapoints))
       .catch();
   }
 
@@ -77,12 +52,11 @@ function App() {
     let year = date.getFullYear();
     let month = date.getMonth() + 1;
     let day = date.getDate();
-    let timeshift = -date.getTimezoneOffset() / 60;
-    let shiftSign = timeshift < 0 ? "-" : "+";
-    let string = `${year}-${zeroPad(month)}-${zeroPad(
+    let shift = -date.getTimezoneOffset() / 60;
+    let shiftSign = shift < 0 ? "-" : "+";
+    return `${year}-${zeroPad(month)}-${zeroPad(
       day
-    )}T${time}${shiftSign}${zeroPad(timeshift)}:00`;
-    return string;
+    )}T${time}${shiftSign}${zeroPad(shift)}:00`;
   }
 
   function zeroPad(num) {
@@ -91,66 +65,52 @@ function App() {
   }
 
   function handleActiveDot(dat, el) {
-    setState((prevState) => {
-      if (prevState.activeDot !== null)
-        prevState.activeDot.element.classList.remove("dotSelected");
+    setActiveDot((prevState) => {
+      if (prevState !== null) prevState.element.classList.remove("dotSelected");
       el.classList.add("dotSelected");
       el.parentNode.append(el);
       return {
-        ...prevState,
-        activeDot: {
-          data: dat,
-          element: el,
-        },
+        data: dat,
+        element: el,
       };
     });
   }
 
   function handleMinMax(min, max) {
-    setState((prevState) => ({
-      ...prevState,
-      minMax: [min, max],
-    }));
+    setMinMax([min, max]);
   }
 
   function handleMenuSelection(selection) {
-    setState((prevState) => ({
-      ...prevState,
-      activePage: selection,
-      activeDot: null,
-    }));
+    setActivePage(selection);
+    setActiveDot(null);
   }
 
   function handleDateSelect(dates) {
-    setState((prevState) => ({ ...prevState, dateRange: dates }));
-    fetchData(dates, state.timeRange);
+    setDateRange(dates);
+    fetchData(dates, timeRange);
   }
 
   function handleTimeSelect(times) {
-    setState((prevState) => ({ ...prevState, timeRange: times }));
-    fetchData(state.dateRange, times);
+    setTimeRange(times);
+    fetchData(dateRange, times);
   }
 
   function handleExpandSelector() {
-    setState((prevState) => ({
-      ...prevState,
-      expandTimeSel: !prevState.expandTimeSel,
-    }));
+    setExpandTimeSel((prevState) => !prevState);
   }
 
   function showDataView() {
-    if (state.activePage === null) {
-      handleMenuSelection(state.pages[1]); // Set start page
+    if (!activePage) {
+      handleMenuSelection(pages[1]); // Set start page
       return;
     }
-    const id = state.activePage.id;
-    if (state.data === null) return;
+    if (!data) return;
 
-    if (id === 0)
+    if (activePage.id === 0)
       return (
         <DataView
-          key={state.activePage.name}
-          data={state.data}
+          key={activePage.name}
+          data={data}
           y_ID="co" // the property name in the raw data
           unit="ppm" // y-axis label
           defaultYRange={[0, 300]}
@@ -159,11 +119,11 @@ function App() {
           minMax={handleMinMax}
         />
       );
-    else if (id === 1)
+    else if (activePage.id === 1)
       return (
         <DataView
-          key={state.activePage.name}
-          data={state.data}
+          key={activePage.name}
+          data={data}
           y_ID="temperature" // the property name in the raw data
           unit="°C" // y-axis label
           defaultYRange={[0, 20]}
@@ -176,6 +136,11 @@ function App() {
 
   return (
     <div className="app">
+      <Menu
+        entries={pages}
+        active={activePage}
+        select={(selection) => handleMenuSelection(selection)}
+      />
       <div id="content">
         <div id="wrapper">
           <div id="logoBar">
@@ -187,15 +152,15 @@ function App() {
               onClick={handleExpandSelector}
             >
               <span>
-                {state.dateRange[0].toLocaleDateString()} -{" "}
-                {state.dateRange[1].toLocaleDateString()}
+                {dateRange[0].toLocaleDateString()} -{" "}
+                {dateRange[1].toLocaleDateString()}
               </span>
               <div className="triangle" />
             </div>
-            {state.expandTimeSel ? (
+            {expandTimeSel ? (
               <Calendar
                 onChange={handleDateSelect}
-                value={state.dateRange}
+                value={dateRange}
                 returnValue="range"
                 selectRange={true}
               />
@@ -203,7 +168,7 @@ function App() {
             <div>
               <TimeRangePicker
                 onChange={handleTimeSelect}
-                value={state.timeRange}
+                value={timeRange}
                 disableClock={true}
               />
             </div>
@@ -216,39 +181,30 @@ function App() {
                   <tr>
                     <td className="infoCard-header">Datum</td>
                     <td className="infoCard-value space-l-20">
-                      {state.activeDot ? state.activeDot.data[0].day : ""}
+                      {activeDot ? activeDot.data[0].day : ""}
                     </td>
                   </tr>
                   <tr>
                     <td className="infoCard-header">Uhrzeit</td>
                     <td className="infoCard-value space-l-20">
-                      {state.activeDot
-                        ? state.activeDot.data[0].time + " Uhr"
-                        : ""}
+                      {activeDot ? activeDot.data[0].time + " Uhr" : ""}
                     </td>
                   </tr>
                   <tr className="infoCard-value-big">
-                    <td colSpan="2">
-                      {state.activeDot ? state.activeDot.data[1] : "--"}
-                    </td>
+                    <td colSpan="2">{activeDot ? activeDot.data[1] : "--"}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div className="infoCard infoCard-dark space-l-60">
               <span className="infoCard-header">Minimum</span>
-              <span className="infoCard-value">{state.minMax[0]}</span>
+              <span className="infoCard-value">{minMax[0]}</span>
               <span className="infoCard-header">Maximum</span>
-              <span className="infoCard-value">{state.minMax[1]}</span>
+              <span className="infoCard-value">{minMax[1]}</span>
             </div>
           </div>
         </div>
       </div>
-      <Menu
-        entries={state.pages}
-        active={state.activePage}
-        select={(selection) => handleMenuSelection(selection)}
-      />
     </div>
   );
 }
