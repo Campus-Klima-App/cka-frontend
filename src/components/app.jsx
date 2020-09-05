@@ -51,7 +51,6 @@ function App() {
       })
       .then((response) => {
         setData(response.data.datapoints);
-        console.log(response.data.datapoints);
       })
       .catch();
     setExpandTimeSel(false);
