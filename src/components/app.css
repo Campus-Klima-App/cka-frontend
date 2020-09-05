@@ -52,38 +52,67 @@
   margin: 0 auto;
 }
 
+#section1 {
+  margin: 0 20px;
+}
+
 #logoBar {
   margin-top: 20px;
   width: 100%;
-  height: 100px;
+  height: 80px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
 }
 
 #logo {
-  width: 200px;
+  width: 150px;
   height: 50px;
   background-repeat: no-repeat;
   background-image: url("../icons/logo.svg");
   background-size: contain;
+  background-position: center;
 }
 
-#timeSelect {
-  position: relative;
-  margin: 0 auto;
+#timeBar {
+  width: 70%;
+  margin-right: auto;
+}
+
+.timeBar-items {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.timeBar-item-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 10px;
+  font-size: 0.8rem;
+}
+
+/* TOP BAR ======================================= */
+
+.bar {
+  height: 50px;
+  display: flex;
+  justify-content: right;
   align-items: center;
 }
 
 /* DATE-SELECTION BUTTON ======================================= */
 
 .dateSelect {
-  width: fit-content;
-  width: -moz-fit-content;
+  position: relative;
+}
+
+.dateSelect-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dateSelect-button {
+  margin: 10px;
   height: 40px;
-  margin-bottom: 15px;
   padding: 0 10px;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.05);
@@ -93,22 +122,18 @@
   z-index: 100;
 }
 
-.dateSelect:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 .dateSelect span {
-  display: inline-block;
   white-space: nowrap;
   text-align: center;
   user-select: none;
   color: white;
+  margin-right: 10px;
 }
 
 .triangle {
   width: 0;
   height: 0;
-  margin-left: 10px;
+  margin-left: auto;
   border-style: solid;
   border-width: 5px 5px 0 5px;
   border-color: #ffffff transparent transparent transparent;
@@ -118,19 +143,43 @@
 
 .react-calendar {
   position: absolute;
-  transform: translate(-40%, 8%);
-  transform-origin: top;
-  margin: 20px auto 0 auto;
-  width: 300px !important;
-  z-index: 50;
+  top: 60px;
+  min-width: 340px !important;
+  z-index: 100;
   padding: 20px;
+  margin-left: 10px;
   border-radius: 10px;
   background: #363d43 !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  animation: calendar-slidein 0.1s ease-out;
+  animation: calendar-slidein 0.2s ease-out;
   animation-fill-mode: forwards;
   box-shadow: 0 0 100px -50px rgba(0, 0, 0, 0.8);
   color: #d4d4d4;
+}
+
+@keyframes calendar-slidein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .timeBar-items {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  #timeBar {
+    margin: 0 auto;
+  }
+  #logoBar {
+    justify-content: center;
+  }
+  .react-calendar {
+    margin-left: -60px;
+  }
 }
 
 .react-calendar__navigation * {
@@ -160,27 +209,14 @@
 
 .react-calendar__tile--now {
   background: #b6d274 !important;
-  color: rgb(61, 69, 76) !important;
-}
-
-.react-calendar__tile--now:hover {
-  color: rgb(255, 255, 255) !important;
 }
 
 .react-calendar__tile--hover {
   background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-@keyframes calendar-slidein {
-  from {
-    opacity: 0;
-    transform: translate(0, 8%) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(0, 8%) scale(1);
-  }
+.react-calendar__tile--hover.react-calendar__tile--now {
+  background: #b6d274 !important;
 }
 
 /* TIME-RANGE COMPONENT ======================================= */
@@ -199,6 +235,9 @@
 }
 
 .react-timerange-picker__wrapper {
+  width: 200px;
+  height: 40px;
+  margin: 10px;
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 5px 0 5px 10px;
@@ -217,8 +256,8 @@
   width: 100%;
   max-width: 800px;
   margin: 20px auto;
-  font-size: 16px;
-  font-size: min(16px, 4vw);
+  font-size: 14px;
+  font-size: min(14px, 4vw);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -263,14 +302,4 @@
 
 .infoCard-value-big td {
   padding-top: 10px;
-}
-
-/* TOP BAR ======================================= */
-
-.bar {
-  height: 50px;
-  padding: 0 20px;
-  display: flex;
-  justify-content: right;
-  align-items: center;
 }

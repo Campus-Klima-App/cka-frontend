@@ -16,8 +16,8 @@ function App() {
   const [pages] = useState([
     { id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon },
     { id: 1, name: "Temperatur", icon: Temp_Icon },
-    { id: 3, name: "Luftfeuchtigkeit", icon: Humid_Icon },
-    { id: 4, name: "UV-Index", icon: UV_Icon },
+    { id: 2, name: "Luftfeuchtigkeit", icon: Humid_Icon },
+    { id: 3, name: "UV-Index", icon: UV_Icon },
   ]);
   const [activePage, setActivePage] = useState(null);
   const [data, setData] = useState(null);
@@ -30,6 +30,9 @@ function App() {
 
   if (allowDataFetch) {
     fetchData(dateRange, timeRange);
+    setInterval(() => {
+      fetchData(dateRange, timeRange);
+    }, 60000 * 5);
     setAllowDataFetch(false);
   }
 
@@ -48,6 +51,7 @@ function App() {
       })
       .then((response) => {
         setData(response.data.datapoints);
+        console.log(response.data.datapoints);
       })
       .catch();
     setExpandTimeSel(false);
@@ -140,6 +144,16 @@ function App() {
           margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
         />
       );
+    else if (activePage.id === 2)
+      return (
+        <DataView
+          {...commonProps}
+          dataProperty="humidity" // the property name in the raw data
+          unit="%" // y-axis label
+          defaultYRange={[0, 100]}
+          margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
+        />
+      );
   }
 
   return (
@@ -151,38 +165,48 @@ function App() {
       />
       <div id="content">
         <div id="wrapper">
-          <div id="logoBar">
-            <div id="logo" />
-          </div>
-          <div id="timeSelect">
-            <div
-              className="dateSelect light-border"
-              onTouchEnd={(ev) => handleExpandSelector(ev)}
-              onClick={handleExpandSelector}
-            >
-              <span>
-                {dateRange[0].toLocaleDateString()} -{" "}
-                {dateRange[1].toLocaleDateString()}
-              </span>
-              <div className="triangle" />
+          <div id="section1">
+            <div id="logoBar">
+              <div id="logo" />
             </div>
-            <Calendar
-              onChange={handleDateSelect}
-              value={dateRange}
-              returnValue="range"
-              selectRange={true}
-              className={!expandTimeSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
-            />
-            <div>
-              <TimeRangePicker
-                onChange={handleTimeSelect}
-                value={timeRange}
-                disableClock={true}
-              />
+            <div id="timeBar">
+              <div className="timeBar-items">
+                <div className="timeBar-item-group">
+                  <span className="timeBar-item-label">Datum</span>
+                  <div className="dateSelect">
+                    <div
+                      className="dateSelect-button light-border"
+                      onTouchEnd={(ev) => handleExpandSelector(ev)}
+                      onClick={handleExpandSelector}
+                    >
+                      <span>
+                        {dateRange[0].toLocaleDateString()} -{" "}
+                        {dateRange[1].toLocaleDateString()}
+                      </span>
+                      <div className="triangle" />
+                    </div>
+                    <Calendar
+                      onChange={handleDateSelect}
+                      value={dateRange}
+                      returnValue="range"
+                      selectRange={true}
+                      className={!expandTimeSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
+                    />
+                  </div>
+                </div>
+                <div className="timeBar-item-group">
+                  <span className="timeBar-item-label">Uhrzeit</span>
+                  <TimeRangePicker
+                    onChange={handleTimeSelect}
+                    value={timeRange}
+                    disableClock={true}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bar">
-            <RefreshButton clicked={() => fetchData(dateRange, timeRange)} />
+            <div className="bar">
+              <RefreshButton clicked={() => fetchData(dateRange, timeRange)} />
+            </div>
           </div>
           <div className="dataView-wrapper">{showDataView()}</div>
           <div className="infoArea">
