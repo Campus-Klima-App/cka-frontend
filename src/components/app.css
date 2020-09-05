@@ -1,7 +1,7 @@
 /* GENERAL ======================================= */
 
 .light-border {
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .space-l-20 {
@@ -14,6 +14,10 @@
 
 .text-center {
   text-align: center;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* ============================================================ */
@@ -43,13 +47,13 @@
 }
 
 #wrapper {
-  width: 100%;
+  width: 90%;
   max-width: 1000px;
   margin: 0 auto;
 }
 
 #logoBar {
-  margin-top: 50px;
+  margin-top: 20px;
   width: 100%;
   height: 100px;
   display: flex;
@@ -82,7 +86,7 @@
   margin-bottom: 15px;
   padding: 0 10px;
   border-radius: 5px;
-  background: rgba(207, 236, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
@@ -90,7 +94,7 @@
 }
 
 .dateSelect:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .dateSelect span {
@@ -195,7 +199,7 @@
 }
 
 .react-timerange-picker__wrapper {
-  background: #363d43 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 5px 0 5px 10px;
   border-radius: 5px;
@@ -205,7 +209,6 @@
 
 .dataView-wrapper {
   width: 100%;
-  padding: 10px 20px;
 }
 
 /* INFO AREA AND CARDS ======================================= */
@@ -214,6 +217,8 @@
   width: 100%;
   max-width: 800px;
   margin: 20px auto;
+  font-size: 16px;
+  font-size: min(16px, 4vw);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -221,18 +226,15 @@
 }
 
 .infoCard {
-  font-size: 14px;
-  width: 250px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 25px;
+  flex-basis: 250px;
+  padding: 20px;
   border-radius: 20px;
   text-align: left;
   margin: 10px;
-  box-shadow: 0 5px 30px -20px rgba(0, 0, 0, 0.2);
 }
 
-.infoCard-dark {
-  background: rgba(255, 255, 255, 0.03);
+.infoCard-2 {
+  flex-basis: 150px;
 }
 
 .infoCard table {
@@ -244,19 +246,31 @@
 }
 
 .infoCard-header {
+  font-size: 0.9em;
   color: #6d7072;
 }
 
 .infoCard-value {
   color: #ababab;
+  white-space: nowrap;
 }
 
 .infoCard-value-big {
   text-align: center;
   color: white;
-  font-size: 30px;
+  font-size: 1.8em;
 }
 
 .infoCard-value-big td {
   padding-top: 10px;
+}
+
+/* TOP BAR ======================================= */
+
+.bar {
+  height: 50px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: right;
+  align-items: center;
 }

@@ -4,7 +4,7 @@ import "./dataView.css";
 
 export default function DataView({
   data,
-  y_ID,
+  dataProperty,
   unit,
   defaultYRange,
   margin,
@@ -16,69 +16,55 @@ export default function DataView({
     xAxisRef = useRef(),
     yAxisRef = useRef();
   const { width, height } = useContainerDimensions(containerRef);
-  const [state, setState] = useState({
-    dataArray: [],
-    dataMinMax: [0, 0],
-    minDate: null,
-    maxDate: null,
-    error: false,
-    activeDotElement: null
-  });
+
+  const [dataArray, setDataArray] = useState([]);
+  const [dataMinMax, setDataMinMax] = useState([0, 0]);
+  const [minDate, setMinDate] = useState(null);
+  const [maxDate, setMaxDate] = useState(null);
+  const [error, setError] = useState(false);
 
   if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
 
   // Reaction to change in data
   useEffect(() => {
     // Format the data for later use
-    const datArr = data.map((d) => [new Date(d.time), d[y_ID]]);
+
+    const datArr = data.map((d) => [new Date(d.time), d[dataProperty]]);
+    setDataArray(datArr);
+    setMinDate(d3.min(datArr, (d) => d[0]));
+    setMaxDate(d3.max(datArr, (d) => d[0]));
+
+    // return the min and max to the parent app for display
+    minMax(
+      d3.min(data, (d) => d[dataProperty]) + " " + unit,
+      d3.max(data, (d) => d[dataProperty]) + " " + unit
+    );
 
     // Set the minimum and maximum of the Y-axis
     if (defaultYRange) {
       let min =
-        d3.min(data, (d) => d[y_ID]) < defaultYRange[0]
-          ? Math.floor(d3.min(data, (d) => d[y_ID]))
+        d3.min(data, (d) => d[dataProperty]) < defaultYRange[0]
+          ? Math.floor(d3.min(data, (d) => d[dataProperty]))
           : defaultYRange[0];
 
       let max =
-        d3.max(data, (d) => d[y_ID]) > defaultYRange[1]
-          ? Math.ceil(d3.max(data, (d) => d[y_ID]))
+        d3.max(data, (d) => d[dataProperty]) > defaultYRange[1]
+          ? Math.ceil(d3.max(data, (d) => d[dataProperty]))
           : defaultYRange[1];
 
-      setState((prevState) => ({
-        ...prevState,
-        dataMinMax: [min, max],
-      }));
+      setDataMinMax([min, max]);
     }
-
-    // Set the minimum and maximum of the X-axis
-    setState((prevState) => ({
-      ...prevState,
-      dataArray: datArr,
-      minDate: d3.min(datArr, (d) => d[0]),
-      maxDate: d3.max(datArr, (d) => d[0]),
-    }));
-
-    // return the min and max to the parent app for display
-    minMax(
-      d3.min(data, (d) => d[y_ID]) + " " + unit,
-      d3.max(data, (d) => d[y_ID]) + " " + unit
-    );
-  }, [data]);
+  }, [data, width]);
 
   // Update of the d3 graphic - called when width or height of the container is changing
   useEffect(() => {
-    if (
-      state.minDate !== undefined &&
-      state.maxDate !== undefined &&
-      data.length !== 0
-    ) {
+    if (minDate !== undefined && maxDate !== undefined && data.length !== 0) {
       updateD3();
-      setState((prevState) => ({ ...prevState, error: false }));
+      setError(false);
     } else {
-      if (data.length === 0)
-        setState((prevState) => ({ ...prevState, error: true }));
+      if (data.length === 0) setError(true);
     }
-  }, [width, height, state.dataArray, state.error]);
+  }, [width, height, dataArray, error]);
 
   // START OF MAIN RENDERING FUNCTION ==============================================================
 
@@ -90,11 +76,7 @@ export default function DataView({
     const [labelText, xAxisMinMax, xScaling] = variableTicks(count);
 
     const xScale = d3.scaleTime().domain(xAxisMinMax).range([0, w]);
-
-    const yScale = d3
-      .scaleLinear()
-      .domain(state.dataMinMax)
-      .range([h - 20, 0]);
+    const yScale = d3.scaleLinear().domain(dataMinMax).range([h, 0]);
 
     const xAxis = d3
       .axisBottom(xScale)
@@ -112,21 +94,31 @@ export default function DataView({
     const yDOM = d3.select(yAxisRef.current).call(yAxis);
 
     yDOM.selectAll("line").remove();
-    //yDOM.select(".domain").remove();
+    yDOM.select(".domain").remove();
+
+    let lastPoint = 0;
+    const filterData = dataArray.filter((d, i) => {
+      if (i === 0) {
+        return true;
+      }
+      const diff = Math.ceil(xScale(d[0])) - lastPoint;
+      if (diff > 10) {
+        lastPoint = Math.ceil(xScale(d[0]));
+        return true;
+      }
+      return false;
+    });
 
     d3.select(dotsContainerRef.current)
       .selectAll("circle")
-      .data(state.dataArray)
+      .data(filterData)
       .join("circle")
       .attr("cx", (d) => xScale(d[0]))
       .attr("cy", (d) => yScale(d[1]))
       .attr("r", 5)
       .classed("dot", true)
-      .on("mouseover", (d) => handleDotInfo(d, d3.event.target, xScaling))
-      .on("click", (d) => handleDotInfo(d, d3.event.target, xScaling));
-
-    if (state.activeDotElement !== null && state.activeDotElement.parentNode !== null)
-      state.activeDotElement.parentNode.append(state.activeDotElement);
+      .on("mouseover", (d) => handleDotInfo(d, d3.event.target))
+      .on("click", (d) => handleDotInfo(d, d3.event.target));
   }
 
   // END OF MAIN RENDERING FUNCTION ==============================================================
@@ -143,7 +135,7 @@ export default function DataView({
   function handleDotInfo(datum, element) {
     let valueWithUnit =
       datum[1] === undefined
-        ? "Keine Daten"
+        ? "Kein Wert"
         : zeroPadFloat(datum[1]) + " " + unit;
     activeDot(
       [
@@ -155,10 +147,6 @@ export default function DataView({
       ],
       element
     );
-    setState((prevState) => ({
-      ...prevState,
-      activeDotElement: element,
-    }));
   }
 
   // Tries to find final time-axis values and scaling
@@ -170,12 +158,10 @@ export default function DataView({
       monInterval = 0,
       dayInterval = 0,
       hourInterval = 0,
-      minInterval = 0;
-    const minDate = state.minDate;
-    const maxDate = state.maxDate;
+      minInterval;
 
     let axisMinMax;
-    let newCount = 1;
+    let newCount;
 
     scaling = "minute";
     [axisMinMax, minInterval, newCount] = minuteTicks(count, minDate, maxDate);
@@ -224,7 +210,7 @@ export default function DataView({
 
   return (
     <div className="svgContainer" ref={containerRef}>
-      {state.error === false ? (
+      {error === false ? (
         <svg height="100%" width="100%">
           <g transform={`translate(${margin.left},${margin.top})`}>
             <text x="-30" y="-20" textAnchor="middle" className="yLabel">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
+import RefreshButton from "./refreshButton";
 import Calendar from "react-calendar";
 import TimeRangePicker from "@wojtekmaj/react-timerange-picker";
 import axios from "axios";
@@ -37,15 +38,19 @@ function App() {
       timeRange === null || timeRange[0] === null ? "00:00" : timeRange[0];
     let toTime =
       timeRange === null || timeRange[1] === null ? "23:59" : timeRange[1];
+    let headers = {
+      from: dateToString(dateRange[0], fromTime),
+      to: dateToString(dateRange[1], toTime),
+    };
     axios
       .get("http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/", {
-        headers: {
-          from: dateToString(dateRange[0], fromTime),
-          to: dateToString(dateRange[1], toTime),
-        },
+        headers,
       })
-      .then((response) => setData(response.data.datapoints))
+      .then((response) => {
+        setData(response.data.datapoints);
+      })
       .catch();
+    setExpandTimeSel(false);
   }
 
   function dateToString(date, time) {
@@ -66,9 +71,10 @@ function App() {
 
   function handleActiveDot(dat, el) {
     setActiveDot((prevState) => {
-      if (prevState !== null) prevState.element.classList.remove("dotSelected");
+      if (prevState) {
+        prevState.element.classList.remove("dotSelected");
+      }
       el.classList.add("dotSelected");
-      el.parentNode.append(el);
       return {
         data: dat,
         element: el,
@@ -95,8 +101,9 @@ function App() {
     fetchData(dateRange, times);
   }
 
-  function handleExpandSelector() {
+  function handleExpandSelector(ev) {
     setExpandTimeSel((prevState) => !prevState);
+    ev.preventDefault();
   }
 
   function showDataView() {
@@ -106,30 +113,31 @@ function App() {
     }
     if (!data) return;
 
+    let commonProps = {
+      key: activePage.name,
+      data: data,
+      activeDot: handleActiveDot,
+      minMax: handleMinMax,
+    };
+
     if (activePage.id === 0)
       return (
         <DataView
-          key={activePage.name}
-          data={data}
-          y_ID="co" // the property name in the raw data
+          {...commonProps}
+          dataProperty="co" // the property name in the raw data
           unit="ppm" // y-axis label
           defaultYRange={[0, 300]}
-          margin={{ left: 60, right: 30, top: 40, bottom: 35 }}
-          activeDot={handleActiveDot}
-          minMax={handleMinMax}
+          margin={{ left: 60, right: 20, top: 40, bottom: 35 }}
         />
       );
     else if (activePage.id === 1)
       return (
         <DataView
-          key={activePage.name}
-          data={data}
-          y_ID="temperature" // the property name in the raw data
+          {...commonProps}
+          dataProperty="temperature" // the property name in the raw data
           unit="°C" // y-axis label
-          defaultYRange={[0, 20]}
-          margin={{ left: 50, right: 30, top: 40, bottom: 35 }}
-          activeDot={handleActiveDot}
-          minMax={handleMinMax}
+          defaultYRange={[0, 30]}
+          margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
         />
       );
   }
@@ -149,6 +157,7 @@ function App() {
           <div id="timeSelect">
             <div
               className="dateSelect light-border"
+              onTouchEnd={(ev) => handleExpandSelector(ev)}
               onClick={handleExpandSelector}
             >
               <span>
@@ -157,14 +166,13 @@ function App() {
               </span>
               <div className="triangle" />
             </div>
-            {expandTimeSel ? (
-              <Calendar
-                onChange={handleDateSelect}
-                value={dateRange}
-                returnValue="range"
-                selectRange={true}
-              />
-            ) : null}
+            <Calendar
+              onChange={handleDateSelect}
+              value={dateRange}
+              returnValue="range"
+              selectRange={true}
+              className={!expandTimeSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
+            />
             <div>
               <TimeRangePicker
                 onChange={handleTimeSelect}
@@ -172,6 +180,9 @@ function App() {
                 disableClock={true}
               />
             </div>
+          </div>
+          <div className="bar">
+            <RefreshButton clicked={() => fetchData(dateRange, timeRange)} />
           </div>
           <div className="dataView-wrapper">{showDataView()}</div>
           <div className="infoArea">
@@ -181,13 +192,15 @@ function App() {
                   <tr>
                     <td className="infoCard-header">Datum</td>
                     <td className="infoCard-value space-l-20">
-                      {activeDot ? activeDot.data[0].day : ""}
+                      {activeDot ? activeDot.data[0].day : "Keine Auswahl"}
                     </td>
                   </tr>
                   <tr>
                     <td className="infoCard-header">Uhrzeit</td>
                     <td className="infoCard-value space-l-20">
-                      {activeDot ? activeDot.data[0].time + " Uhr" : ""}
+                      {activeDot
+                        ? activeDot.data[0].time + " Uhr"
+                        : "Keine Auswahl"}
                     </td>
                   </tr>
                   <tr className="infoCard-value-big">
@@ -196,11 +209,13 @@ function App() {
                 </tbody>
               </table>
             </div>
-            <div className="infoCard infoCard-dark space-l-60">
-              <span className="infoCard-header">Minimum</span>
-              <span className="infoCard-value">{minMax[0]}</span>
-              <span className="infoCard-header">Maximum</span>
-              <span className="infoCard-value">{minMax[1]}</span>
+            <div className="infoCard infoCard-2 light-border">
+              <div className="infoCard-group">
+                <span className="infoCard-header">Minimum</span>
+                <span className="infoCard-value">{minMax[0]}</span>
+                <span className="infoCard-header">Maximum</span>
+                <span className="infoCard-value">{minMax[1]}</span>
+              </div>
             </div>
           </div>
         </div>
