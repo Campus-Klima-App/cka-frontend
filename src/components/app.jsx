@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
 import RefreshButton from "./refreshButton";
@@ -10,32 +10,34 @@ import "react-calendar/dist/Calendar.css";
 import CO_Icon from "../icons/CO_Icon.svg";
 import Temp_Icon from "../icons/Temp_Icon.svg";
 import Humid_Icon from "../icons/Humid_Icon.svg";
-import UV_Icon from "../icons/UV_Icon.svg";
+//import UV_Icon from "../icons/UV_Icon.svg";
 
 function App() {
+  /* states of the app - when a new function call is made,
+     these are the only values that are preserved and not overridden */
   const [pages] = useState([
     { id: 0, name: "Kohlenstoffmonoxid", icon: CO_Icon },
     { id: 1, name: "Temperatur", icon: Temp_Icon },
     { id: 2, name: "Luftfeuchtigkeit", icon: Humid_Icon },
     //{ id: 3, name: "UV-Index", icon: UV_Icon }, UV is only necesarry if a Sensor is installed
   ]);
-  const [activePage, setActivePage] = useState(null);
+  const [activePage, setActivePage] = useState(pages[0]);
   const [data, setData] = useState(null);
-  const [allowDataFetch, setAllowDataFetch] = useState(true);
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [timeRange, setTimeRange] = useState([null, null]);
   const [minMax, setMinMax] = useState(["-", "-"]);
   const [activeDot, setActiveDot] = useState(null);
-  const [expandTimeSel, setExpandTimeSel] = useState(false);
+  const [expandDateSel, setExpandDateSel] = useState(false);
 
-  if (allowDataFetch) {
+  /* One time action that is executed when site is first loaded or reloaded */
+  useEffect(() => {
     fetchData(dateRange, timeRange);
     setInterval(() => {
       fetchData(dateRange, timeRange);
     }, 60000 * 5);
-    setAllowDataFetch(false);
-  }
+  }, []);
 
+  /* Request new data via GET-Request */
   function fetchData(dateRange, timeRange) {
     let fromTime =
       timeRange === null || timeRange[0] === null ? "00:00" : timeRange[0];
@@ -45,17 +47,24 @@ function App() {
       from: dateToString(dateRange[0], fromTime),
       to: dateToString(dateRange[1], toTime),
     };
-    axios
-      .get("http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/", {
-        headers,
-      })
-      .then((response) => {
-        setData(response.data.datapoints);
-      })
-      .catch();
-    setExpandTimeSel(false);
+    try {
+      axios
+        .get(
+          "http://campus-klima-app.mi.medien.hs-duesseldorf.de/datapoints/",
+          {
+            headers,
+          }
+        )
+        .then((response) => {
+          setData(response.data.datapoints);
+        });
+    } catch (e) {
+      console.log(e); // TO-DO: FEHLERMELDUNG IMPLEMENTIEREN!! ================================
+    }
+    setExpandDateSel(false);
   }
 
+  /* Create the string representation for a date which can be parsed by the backend */
   function dateToString(date, time) {
     let year = date.getFullYear();
     let month = date.getMonth() + 1;
@@ -67,17 +76,21 @@ function App() {
     )}T${time}${shiftSign}${zeroPad(shift)}:00`;
   }
 
+  /* Convert a number to a string where to a single digit number a leading zero is added */
   function zeroPad(num) {
     let s = "00" + num;
     return s.substr(s.length - 2);
   }
 
+  /* Callback function of DataView-Component:
+     - Set the currently active point in form of attached data : [{day, time}, valueWithUnit]
+     and the element */
   function handleActiveDot(dat, el) {
     setActiveDot((prevState) => {
       if (prevState) {
-        prevState.element.classList.remove("dotSelected");
+        prevState.element.removeAttribute("id");
       }
-      el.classList.add("dotSelected");
+      el.id = "activeDot";
       return {
         data: dat,
         element: el,
@@ -85,74 +98,40 @@ function App() {
     });
   }
 
+  /* Callback function of DataView-Component:
+      - Set the calculated minimum and maximum of the data */
   function handleMinMax(min, max) {
     setMinMax([min, max]);
   }
 
+  /* Callback function of Menu-Component:
+     - Set the active page based on the selected page in the menu
+     - Reset the current active dot */
   function handleMenuSelection(selection) {
     setActivePage(selection);
     setActiveDot(null);
   }
 
+  /* Callback function of Calendar-Component:
+     - Set dateRange to the returned array : [startDate, endDate] based on the selection
+     - Update the data with the new date range */
   function handleDateSelect(dates) {
     setDateRange(dates);
     fetchData(dates, timeRange);
   }
 
+  /* Callback function of TimeRangePicker-Component:
+     - Set timeRange to the returned array : [startTime, endTime] based on the selection
+     - Update the data with the new time range */
   function handleTimeSelect(times) {
     setTimeRange(times);
     fetchData(dateRange, times);
   }
 
-  function handleExpandSelector(ev) {
-    setExpandTimeSel((prevState) => !prevState);
-    ev.preventDefault();
-  }
-
-  function showDataView() {
-    if (!activePage) {
-      handleMenuSelection(pages[1]); // Set start page
-      return;
-    }
-    if (!data) return;
-
-    let commonProps = {
-      key: activePage.name,
-      data: data,
-      activeDot: handleActiveDot,
-      minMax: handleMinMax,
-    };
-
-    if (activePage.id === 0)
-      return (
-        <DataView
-          {...commonProps}
-          dataProperty="co" // the property name in the raw data
-          unit="ppm" // y-axis label
-          defaultYRange={[0, 300]}
-          margin={{ left: 60, right: 20, top: 40, bottom: 35 }}
-        />
-      );
-    else if (activePage.id === 1)
-      return (
-        <DataView
-          {...commonProps}
-          dataProperty="temperature" // the property name in the raw data
-          unit="°C" // y-axis label
-          defaultYRange={[0, 30]}
-          margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
-        />
-      );
-    else if (activePage.id === 2)
-      return (
-        <DataView
-          {...commonProps}
-          dataProperty="humidity" // the property name in the raw data
-          unit="%" // y-axis label
-          defaultYRange={[0, 100]}
-          margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
-        />
-      );
+  /*  Event handler for clicking on the date selection button:
+      - Toggle the value of expandDateSel and therefore expand or close the Calendar-Component */
+  function handleExpandSelector() {
+    setExpandDateSel((prevState) => !prevState);
   }
 
   return (
@@ -175,7 +154,6 @@ function App() {
                   <div className="dateSelect">
                     <div
                       className="dateSelect-button light-border"
-                      onTouchEnd={(ev) => handleExpandSelector(ev)}
                       onClick={handleExpandSelector}
                     >
                       <span>
@@ -189,7 +167,7 @@ function App() {
                       value={dateRange}
                       returnValue="range"
                       selectRange={true}
-                      className={!expandTimeSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
+                      className={!expandDateSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
                     />
                   </div>
                 </div>
@@ -207,7 +185,44 @@ function App() {
               <RefreshButton clicked={() => fetchData(dateRange, timeRange)} />
             </div>
           </div>
-          <div className="dataView-wrapper">{showDataView()}</div>
+          <div className="dataView-wrapper">
+            {activePage && data
+              ? (function () {
+                  // Some properties are the same for all components and can be listed once
+                  let commonProps = {
+                    key: activePage.name,
+                    data: data,
+                    activeDot: handleActiveDot,
+                    minMax: handleMinMax,
+                  };
+                  return activePage.id === 0 ? (
+                    <DataView
+                      {...commonProps}
+                      dataProperty="co" // the property name in the raw data
+                      unit="ppm" // Y-axis label
+                      defaultYRange={[0, 300]} // the default range of the Y-Axis
+                      margin={{ left: 60, right: 20, top: 40, bottom: 35 }} // spacing for axis labels
+                    />
+                  ) : activePage.id === 1 ? (
+                    <DataView
+                      {...commonProps}
+                      dataProperty="temperature"
+                      unit="°C"
+                      defaultYRange={[0, 30]}
+                      margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
+                    />
+                  ) : activePage.id === 2 ? (
+                    <DataView
+                      {...commonProps}
+                      dataProperty="humidity"
+                      unit="%"
+                      defaultYRange={[0, 100]}
+                      margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
+                    />
+                  ) : null;
+                })()
+              : null}
+          </div>
           <div className="infoArea">
             <div className="infoCard light-border">
               <table>

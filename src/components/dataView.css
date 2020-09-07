@@ -30,7 +30,7 @@
   fill: #474e56;
 }
 
-.dotSelected {
+#activeDot {
   fill: #c5e773;
 }
 

@@ -2,15 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./dataView.css";
 
-export default function DataView({
-  data,
-  dataProperty,
-  unit,
-  defaultYRange,
-  margin,
-  activeDot,
-  minMax,
-}) {
+export default function DataView(props) {
   let containerRef = useRef(),
     dotsContainerRef = useRef(),
     xAxisRef = useRef(),
@@ -18,60 +10,70 @@ export default function DataView({
   const { width, height } = useContainerDimensions(containerRef);
 
   const [dataArray, setDataArray] = useState([]);
+  const [filterData, setFilterData] = useState([]);
   const [dataMinMax, setDataMinMax] = useState([0, 0]);
   const [minDate, setMinDate] = useState(null);
   const [maxDate, setMaxDate] = useState(null);
   const [error, setError] = useState(false);
   const [activeDotDatum, setActiveDotDatum] = useState(null);
 
-  if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
+  if (!props.margin)
+    props.margin = { left: 40, right: 30, top: 40, bottom: 35 };
 
   // Reaction to change in data
   useEffect(() => {
     // Format the data for later use
-
-    const datArr = data.map((d) => [new Date(d.time), d[dataProperty]]);
+    const datArr = props.data.map((d) => [
+      new Date(d.time),
+      d[props.dataProperty],
+    ]);
     setDataArray(datArr);
     setMinDate(d3.min(datArr, (d) => d[0]));
     setMaxDate(d3.max(datArr, (d) => d[0]));
 
     // return the min and max to the parent app for display
-    minMax(
-      d3.min(data, (d) => d[dataProperty]) + " " + unit,
-      d3.max(data, (d) => d[dataProperty]) + " " + unit
+    props.minMax(
+      d3.min(props.data, (d) => d[props.dataProperty]) + " " + props.unit,
+      d3.max(props.data, (d) => d[props.dataProperty]) + " " + props.unit
     );
 
     // Set the minimum and maximum of the Y-axis
-    if (defaultYRange) {
+    if (props.defaultYRange) {
       let min =
-        d3.min(data, (d) => d[dataProperty]) < defaultYRange[0]
-          ? Math.floor(d3.min(data, (d) => d[dataProperty]))
-          : defaultYRange[0];
+        d3.min(props.data, (d) => d[props.dataProperty]) <
+        props.defaultYRange[0]
+          ? Math.floor(d3.min(props.data, (d) => d[props.dataProperty]))
+          : props.defaultYRange[0];
 
       let max =
-        d3.max(data, (d) => d[dataProperty]) > defaultYRange[1]
-          ? Math.ceil(d3.max(data, (d) => d[dataProperty]))
-          : defaultYRange[1];
+        d3.max(props.data, (d) => d[props.dataProperty]) >
+        props.defaultYRange[1]
+          ? Math.ceil(d3.max(props.data, (d) => d[props.dataProperty]))
+          : props.defaultYRange[1];
 
       setDataMinMax([min, max]);
     }
-  }, [data, width]);
+  }, [props.data, width]);
 
   // Update of the d3 graphic - called when width or height of the container is changing
   useEffect(() => {
-    if (minDate !== undefined && maxDate !== undefined && data.length !== 0) {
+    if (
+      minDate !== undefined &&
+      maxDate !== undefined &&
+      props.data.length !== 0
+    ) {
       updateD3();
       setError(false);
     } else {
-      if (data.length === 0) setError(true);
+      if (props.data.length === 0) setError(true);
     }
   }, [width, height, dataArray, error, activeDotDatum]);
 
   // START OF MAIN RENDERING FUNCTION ==============================================================
 
   function updateD3() {
-    const w = width - (margin.left + margin.right);
-    const h = height - (margin.top + margin.bottom);
+    const w = width - (props.margin.left + props.margin.right);
+    const h = height - (props.margin.top + props.margin.bottom);
 
     const count = calculateTickCount(w);
     const [labelText, xAxisMinMax, xScaling] = variableTicks(count);
@@ -97,14 +99,14 @@ export default function DataView({
     yDOM.selectAll("line").remove();
     yDOM.select(".domain").remove();
 
-    let lastPoint = 0;
+    let lastPoint = { x: 0, y: 0 };
     let filterData = dataArray.filter((d, i) => {
-      if (i === 0) {
-        return true;
-      }
-      const diff = Math.ceil(xScale(d[0])) - lastPoint;
-      if (diff > 10) {
-        lastPoint = Math.ceil(xScale(d[0]));
+      if (i === 0) return true;
+      const diffX = Math.ceil(xScale(d[0])) - lastPoint.x;
+      const diffY = Math.ceil(yScale(d[1])) - lastPoint.y;
+      if (diffX > 10 || diffY > 10) {
+        lastPoint.x = Math.ceil(xScale(d[0]));
+        lastPoint.y = Math.ceil(yScale(d[1]));
         return true;
       }
       return false;
@@ -112,7 +114,10 @@ export default function DataView({
 
     d3.select(dotsContainerRef.current)
       .selectAll("circle")
-      .filter((d, i, nodes) => !nodes[i].classList.contains("dotSelected"))
+      .filter((d, i, nodes) =>
+        nodes[i].hasAttribute("id") ? nodes[i].id !== "activeDot" : true
+      )
+      // remove the active dot from the selection
       .data(filterData)
       .join("circle")
       .attr("cx", (d) => xScale(d[0]))
@@ -123,7 +128,7 @@ export default function DataView({
       .on("click", (d) => handleDotInfo(d, d3.event.target));
 
     if (activeDotDatum) {
-      const dotEl = window.document.getElementsByClassName("dotSelected")[0];
+      const dotEl = window.document.getElementById("activeDot");
       d3.select(dotEl)
         .attr("cx", xScale(activeDotDatum[0]))
         .attr("cy", yScale(activeDotDatum[1]));
@@ -133,6 +138,8 @@ export default function DataView({
 
   // END OF MAIN RENDERING FUNCTION ==============================================================
 
+  // Converts a floating point number to a string where a single digit
+  // number after the comma is padded with a zero
   function zeroPadFloat(num) {
     let splitted = num.toString().split(".", 2);
     let afterComma = 0;
@@ -142,13 +149,16 @@ export default function DataView({
     return splitted[0] + "." + padded;
   }
 
+  // Event handler for hovering or clicking on a dot/point in the graphic:
+  // - Saves the datum of the current active point for correct overriding of the position in the rendering
+  // - Returns information about the current active point to the parent app-Component
   function handleDotInfo(datum, element) {
     setActiveDotDatum(datum);
     let valueWithUnit =
       datum[1] === undefined
         ? "Kein Wert"
-        : zeroPadFloat(datum[1]) + " " + unit;
-    activeDot(
+        : zeroPadFloat(datum[1]) + " " + props.unit;
+    props.activeDot(
       [
         {
           day: multiFormat(datum[0], "day"),
@@ -206,6 +216,7 @@ export default function DataView({
       }
     }
 
+    // Create an array for all the X-axis tick labels
     const labelText = new Array(newCount + 1);
     for (let i = 0; i <= newCount; i++) {
       labelText[i] = new Date(
@@ -216,16 +227,16 @@ export default function DataView({
         axisMinMax[0].getMinutes() + i * minInterval
       );
     }
-    return [labelText, axisMinMax, scaling];
+    return [labelText, axisMinMax, scaling]; // scaling is later used for the formatting of the labels
   }
 
   return (
     <div className="svgContainer" ref={containerRef}>
       {error === false ? (
         <svg height="100%" width="100%">
-          <g transform={`translate(${margin.left},${margin.top})`}>
+          <g transform={`translate(${props.margin.left},${props.margin.top})`}>
             <text x="-30" y="-20" textAnchor="middle" className="yLabel">
-              {unit}
+              {props.unit}
             </text>
             <g ref={xAxisRef} className="xAxis" />
             <g ref={yAxisRef} className="yAxis" />
@@ -262,6 +273,11 @@ function calculateTickCount(width) {
   return Math.floor(width / 60);
 }
 
+// - Calculate the actual number of ticks for the X-axis
+// based on the optimal number of ticks (count)
+// and the minimum and maximum date (min, max)
+// - Calculate the step size/interval for the minute labels (minInterval)
+// - Calculate the minimum and maximum of the labels (newMin, newMax)
 const minuteTicks = (count, min, max) => {
   let counter = 0;
 
@@ -324,6 +340,8 @@ const yearTicks = (count, min, max) => {
   return [newMinMax, yearInterval, newCount];
 };
 
+// Sets the locale time format for german language
+// Used by the multiFormat function
 const locale = d3.timeFormatLocale({
   dateTime: "%A, der %e. %B %Y, %X",
   date: "%d.%m.%Y",
@@ -369,6 +387,7 @@ const locale = d3.timeFormatLocale({
   ],
 });
 
+// Format the incoming date object based on the locale and return a string
 const multiFormat = (date, xScaling) => {
   if (xScaling === "minute") return locale.format("%-H:%M")(date);
   if (xScaling === "hour") return locale.format("%-H:%M")(date);
