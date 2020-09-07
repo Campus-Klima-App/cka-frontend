@@ -22,6 +22,7 @@ export default function DataView({
   const [minDate, setMinDate] = useState(null);
   const [maxDate, setMaxDate] = useState(null);
   const [error, setError] = useState(false);
+  const [activeDotDatum, setActiveDotDatum] = useState(null);
 
   if (!margin) margin = { left: 40, right: 30, top: 40, bottom: 35 };
 
@@ -64,7 +65,7 @@ export default function DataView({
     } else {
       if (data.length === 0) setError(true);
     }
-  }, [width, height, dataArray, error]);
+  }, [width, height, dataArray, error, activeDotDatum]);
 
   // START OF MAIN RENDERING FUNCTION ==============================================================
 
@@ -97,7 +98,7 @@ export default function DataView({
     yDOM.select(".domain").remove();
 
     let lastPoint = 0;
-    const filterData = dataArray.filter((d, i) => {
+    let filterData = dataArray.filter((d, i) => {
       if (i === 0) {
         return true;
       }
@@ -111,6 +112,7 @@ export default function DataView({
 
     d3.select(dotsContainerRef.current)
       .selectAll("circle")
+      .filter((d, i, nodes) => !nodes[i].classList.contains("dotSelected"))
       .data(filterData)
       .join("circle")
       .attr("cx", (d) => xScale(d[0]))
@@ -119,6 +121,14 @@ export default function DataView({
       .classed("dot", true)
       .on("mouseover", (d) => handleDotInfo(d, d3.event.target))
       .on("click", (d) => handleDotInfo(d, d3.event.target));
+
+    if (activeDotDatum) {
+      const dotEl = window.document.getElementsByClassName("dotSelected")[0];
+      d3.select(dotEl)
+        .attr("cx", xScale(activeDotDatum[0]))
+        .attr("cy", yScale(activeDotDatum[1]));
+      dotEl.parentNode.appendChild(dotEl);
+    }
   }
 
   // END OF MAIN RENDERING FUNCTION ==============================================================
@@ -133,6 +143,7 @@ export default function DataView({
   }
 
   function handleDotInfo(datum, element) {
+    setActiveDotDatum(datum);
     let valueWithUnit =
       datum[1] === undefined
         ? "Kein Wert"

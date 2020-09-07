@@ -39,13 +39,6 @@
   overflow-x: hidden;
 }
 
-@media (max-height: 500px) and (min-width: 600px) {
-  #content {
-    bottom: 0;
-    left: 80px;
-  }
-}
-
 #wrapper {
   width: 90%;
   max-width: 1000px;
@@ -53,7 +46,7 @@
 }
 
 #section1 {
-  margin: 0 20px;
+  margin: 0 20px 0 40px;
 }
 
 #logoBar {
@@ -72,11 +65,6 @@
   background-image: url("../icons/logo.svg");
   background-size: contain;
   background-position: center;
-}
-
-#timeBar {
-  width: 70%;
-  margin-right: auto;
 }
 
 .timeBar-items {
@@ -111,6 +99,7 @@
 }
 
 .dateSelect-button {
+  width: 200px;
   margin: 10px;
   height: 40px;
   padding: 0 10px;
@@ -163,22 +152,6 @@
   }
   to {
     opacity: 1;
-  }
-}
-
-@media (max-width: 600px) {
-  .timeBar-items {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  #timeBar {
-    margin: 0 auto;
-  }
-  #logoBar {
-    justify-content: center;
-  }
-  .react-calendar {
-    margin-left: -60px;
   }
 }
 
@@ -302,4 +275,28 @@
 
 .infoCard-value-big td {
   padding-top: 10px;
+}
+
+@media (max-height: 500px) and (min-width: 600px) {
+  #content {
+    bottom: 0;
+    left: 80px;
+  }
+}
+
+@media (max-width: 600px) {
+  .timeBar-items {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  #timeBar {
+    display: flex;
+    justify-content: center;
+  }
+  #logoBar {
+    justify-content: center;
+  }
+  .react-calendar {
+    margin-left: -60px;
+  }
 }
