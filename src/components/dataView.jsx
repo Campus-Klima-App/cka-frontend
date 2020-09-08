@@ -132,7 +132,7 @@ export default function DataView(props) {
       d3.select(dotEl)
         .attr("cx", xScale(activeDotDatum[0]))
         .attr("cy", yScale(activeDotDatum[1]));
-      dotEl.parentNode.appendChild(dotEl);
+      if (dotEl && dotEl.parentNode) dotEl.parentNode.appendChild(dotEl);
     }
   }
 

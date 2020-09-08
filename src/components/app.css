@@ -84,7 +84,7 @@
 .bar {
   height: 50px;
   display: flex;
-  justify-content: right;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -133,12 +133,12 @@
 .react-calendar {
   position: absolute;
   top: 60px;
-  min-width: 340px !important;
+  min-width: 320px !important;
   z-index: 100;
   padding: 20px;
   margin-left: 10px;
   border-radius: 10px;
-  background: #363d43 !important;
+  background: #31383e !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   animation: calendar-slidein 0.2s ease-out;
   animation-fill-mode: forwards;
@@ -156,10 +156,12 @@
 }
 
 .react-calendar__navigation * {
-  color: inherit;
+  color: #93989b;
+  background: inherit !important;
 }
 
 .react-calendar__navigation *:hover {
+  color: white !important;
   background: inherit !important;
 }
 
@@ -182,6 +184,7 @@
 
 .react-calendar__tile--now {
   background: #b6d274 !important;
+  color: rgb(48, 55, 61) !important;
 }
 
 .react-calendar__tile--hover {
