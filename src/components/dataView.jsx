@@ -10,7 +10,6 @@ export default function DataView(props) {
   const { width, height } = useContainerDimensions(containerRef);
 
   const [dataArray, setDataArray] = useState([]);
-  const [filterData, setFilterData] = useState([]);
   const [dataMinMax, setDataMinMax] = useState([0, 0]);
   const [minDate, setMinDate] = useState(null);
   const [maxDate, setMaxDate] = useState(null);
