@@ -25,7 +25,7 @@ function App() {
   const [data, setData] = useState(null);
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [timeRange, setTimeRange] = useState([null, null]);
-  const [minMax, setMinMax] = useState(["-", "-"]);
+  const [minMaxAvg, setMinMaxAvg] = useState({ min: "-", max: "-", avg: "-" });
   const [activeDot, setActiveDot] = useState(null);
   const [expandDateSel, setExpandDateSel] = useState(false);
 
@@ -58,9 +58,7 @@ function App() {
         .then((response) => {
           setData(response.data.datapoints);
         });
-    } catch (e) {
-      console.log(e); // TO-DO: FEHLERMELDUNG IMPLEMENTIEREN!! ================================
-    }
+    } catch (e) {}
     setExpandDateSel(false);
   }
 
@@ -100,8 +98,8 @@ function App() {
 
   /* Callback function of DataView-Component:
       - Set the calculated minimum and maximum of the data */
-  function handleMinMax(min, max) {
-    setMinMax([min, max]);
+  function handleMinMaxAvg(min, max, avg) {
+    setMinMaxAvg({ min: min, max: max, avg: avg });
   }
 
   /* Callback function of Menu-Component:
@@ -193,7 +191,7 @@ function App() {
                     key: activePage.name,
                     data: data,
                     activeDot: handleActiveDot,
-                    minMax: handleMinMax,
+                    minMaxAvg: handleMinMaxAvg,
                   };
                   return activePage.id === 0 ? (
                     <DataView
@@ -250,9 +248,11 @@ function App() {
             <div className="infoCard infoCard-2 light-border">
               <div className="infoCard-group">
                 <span className="infoCard-header">Minimum</span>
-                <span className="infoCard-value">{minMax[0]}</span>
+                <span className="infoCard-value">{minMaxAvg.min}</span>
                 <span className="infoCard-header">Maximum</span>
-                <span className="infoCard-value">{minMax[1]}</span>
+                <span className="infoCard-value">{minMaxAvg.max}</span>
+                <span className="infoCard-header">Mittelwert</span>
+                <span className="infoCard-value">{minMaxAvg.avg}</span>
               </div>
             </div>
           </div>

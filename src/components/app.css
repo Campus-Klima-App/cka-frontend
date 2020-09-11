@@ -133,7 +133,7 @@
 .react-calendar {
   position: absolute;
   top: 60px;
-  min-width: 320px !important;
+  min-width: 340px !important;
   z-index: 100;
   padding: 20px;
   margin-left: 10px;

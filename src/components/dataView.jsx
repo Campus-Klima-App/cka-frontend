@@ -31,10 +31,21 @@ export default function DataView(props) {
     setMaxDate(d3.max(datArr, (d) => d[0]));
 
     // return the min and max to the parent app for display
-    props.minMax(
-      d3.min(props.data, (d) => d[props.dataProperty]) + " " + props.unit,
-      d3.max(props.data, (d) => d[props.dataProperty]) + " " + props.unit
-    );
+    try {
+      props.minMaxAvg(
+        d3.min(props.data, (d) => d[props.dataProperty]).toFixed(1) +
+          " " +
+          props.unit,
+        d3.max(props.data, (d) => d[props.dataProperty]).toFixed(1) +
+          " " +
+          props.unit,
+        d3.mean(props.data, (d) => d[props.dataProperty]).toFixed(1) +
+          " " +
+          props.unit
+      );
+    } catch (e) {
+      props.minMaxAvg("-", "-", "-");
+    }
 
     // Set the minimum and maximum of the Y-axis
     if (props.defaultYRange) {
@@ -137,26 +148,14 @@ export default function DataView(props) {
 
   // END OF MAIN RENDERING FUNCTION ==============================================================
 
-  // Converts a floating point number to a string where a single digit
-  // number after the comma is padded with a zero
-  function zeroPadFloat(num) {
-    let splitted = num.toString().split(".", 2);
-    let afterComma = 0;
-    if (splitted.length > 1) afterComma = splitted[1];
-    let s = "00" + afterComma;
-    let padded = s.substr(s.length - 2);
-    return splitted[0] + "." + padded;
-  }
-
   // Event handler for hovering or clicking on a dot/point in the graphic:
   // - Saves the datum of the current active point for correct overriding of the position in the rendering
   // - Returns information about the current active point to the parent app-Component
   function handleDotInfo(datum, element) {
     setActiveDotDatum(datum);
-    let valueWithUnit =
-      datum[1] === undefined
-        ? "Kein Wert"
-        : zeroPadFloat(datum[1]) + " " + props.unit;
+    let valueWithUnit = !datum[1]
+      ? "Kein Wert"
+      : datum[1].toFixed(1) + " " + props.unit;
     props.activeDot(
       [
         {
