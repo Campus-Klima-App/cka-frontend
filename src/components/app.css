@@ -67,6 +67,26 @@
   background-position: center;
 }
 
+#impress-text {
+  margin: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  color: white;
+  font-size: 0.9em;
+}
+
+#impress-text p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+#impress-text h4 {
+  font-weight: bold;
+  margin-top: 40px;
+  font-size: 1.1em;
+}
+
 .timeBar-items {
   display: flex;
   justify-content: flex-start;
@@ -86,6 +106,11 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  margin: 0 -5px 0 -5px;
+}
+
+.bar > * {
+  margin: 0 5px 0 5px;
 }
 
 /* DATE-SELECTION BUTTON ======================================= */
@@ -228,7 +253,7 @@
 
 /* INFO AREA AND CARDS ======================================= */
 
-.infoArea {
+#section2 {
   width: 100%;
   max-width: 800px;
   margin: 20px auto;

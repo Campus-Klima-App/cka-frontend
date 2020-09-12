@@ -1,4 +1,4 @@
-.refreshButton {
+.button {
   width: 35px;
   height: 35px;
   border-radius: 50%;
@@ -6,28 +6,26 @@
   justify-content: center;
   align-items: center;
   transition: background-color 0.2s ease-in-out;
+  user-select: none;
 }
 
-.refreshButton:hover .refresh-icon {
+.button:hover .button-icon {
   filter: opacity(60%);
   box-shadow: 1px 1px 10px -5px rgba(0, 0, 0, 1);
 }
 
-.refreshButton:active {
+.button:active {
   transition: background-color 0s;
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.refreshButton:active .refresh-icon {
-}
-
-.refresh-icon {
+.button-icon {
   filter: opacity(30%);
   transition: filter 0.2s ease-out;
   width: 60%;
   height: 60%;
-  background-image: url("../icons/Refresh_Icon.svg");
   background-repeat: no-repeat;
+  user-select: none;
 }
 
 .anim {

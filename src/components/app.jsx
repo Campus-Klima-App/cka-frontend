@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DataView from "./dataView";
 import Menu from "./menu";
-import RefreshButton from "./refreshButton";
+import Button from "./button";
 import Calendar from "react-calendar";
 import TimeRangePicker from "@wojtekmaj/react-timerange-picker";
 import axios from "axios";
@@ -11,6 +11,8 @@ import CO_Icon from "../icons/CO_Icon.svg";
 import Temp_Icon from "../icons/Temp_Icon.svg";
 import Humid_Icon from "../icons/Humid_Icon.svg";
 //import UV_Icon from "../icons/UV_Icon.svg";
+import Refresh_Icon from "../icons/Refresh_Icon.svg";
+import Imprint_Icon from "../icons/Imprint_Icon.svg";
 
 function App() {
   /* states of the app - when a new function call is made,
@@ -28,6 +30,7 @@ function App() {
   const [minMaxAvg, setMinMaxAvg] = useState({ min: "-", max: "-", avg: "-" });
   const [activeDot, setActiveDot] = useState(null);
   const [expandDateSel, setExpandDateSel] = useState(false);
+  const [showImpress, setShowImpress] = useState(false);
 
   /* One time action that is executed when site is first loaded or reloaded */
   useEffect(() => {
@@ -108,6 +111,7 @@ function App() {
   function handleMenuSelection(selection) {
     setActivePage(selection);
     setActiveDot(null);
+    setShowImpress(false);
   }
 
   /* Callback function of Calendar-Component:
@@ -132,134 +136,188 @@ function App() {
     setExpandDateSel((prevState) => !prevState);
   }
 
-  return (
-    <div className="app">
-      <Menu
-        entries={pages}
-        active={activePage}
-        select={(selection) => handleMenuSelection(selection)}
-      />
-      <div id="content">
-        <div id="wrapper">
-          <div id="section1">
-            <div id="logoBar">
-              <div id="logo" />
-            </div>
-            <div id="timeBar">
-              <div className="timeBar-items">
-                <div className="timeBar-item-group">
-                  <span className="timeBar-item-label">Datum</span>
-                  <div className="dateSelect">
-                    <div
-                      className="dateSelect-button light-border"
-                      onClick={handleExpandSelector}
-                    >
-                      <span>
-                        {dateRange[0].toLocaleDateString()} -{" "}
-                        {dateRange[1].toLocaleDateString()}
-                      </span>
-                      <div className="triangle" />
+  if (showImpress)
+    return (
+      <div className="app">
+        <Menu
+          entries={pages}
+          active={activePage}
+          select={(selection) => handleMenuSelection(selection)}
+        />
+        <div id="content">
+          <div id="wrapper">
+            <span id="impress-text">
+              <h3>Impressum</h3>
+              <p>
+                Diese Applikation ist im Rahmen einer Projektarbeit im
+                Sommersemester 2020 unter Leitung von Frau Prof. Dr. Gundula
+                Dörries an der Hochschule Düsseldorf entstanden.
+                <br />
+              </p>
+              <h4>Technische Umsetzung</h4>
+              <p>
+                <i>Front-End:</i> <br />
+                Jakob Weirich (jakob.weirich@study.hs-duesseldorf.de)
+              </p>
+              <p>
+                <i>Back-End:</i> <br />
+                Robert Deppe (robert.deppe@study.hs-duesseldorf.de)
+                <br />
+                Michel Schwarz (michel.schwarz@study.hs-duesseldorf.de)
+              </p>
+              <p>
+                <i>Hardware:</i> <br />
+                Michel Schwarz <br />
+                Robert Deppe <br />
+                Jakob Weirich
+              </p>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  else
+    return (
+      <div className="app">
+        <Menu
+          entries={pages}
+          active={activePage}
+          select={(selection) => handleMenuSelection(selection)}
+        />
+        <div id="content">
+          <div id="wrapper">
+            <div id="section1">
+              <div id="logoBar">
+                <div id="logo" />
+              </div>
+              <div id="timeBar">
+                <div className="timeBar-items">
+                  <div className="timeBar-item-group">
+                    <span className="timeBar-item-label">Datum</span>
+                    <div className="dateSelect">
+                      <div
+                        className="dateSelect-button light-border"
+                        onClick={handleExpandSelector}
+                      >
+                        <span>
+                          {dateRange[0].toLocaleDateString()} -{" "}
+                          {dateRange[1].toLocaleDateString()}
+                        </span>
+                        <div className="triangle" />
+                      </div>
+                      <Calendar
+                        onChange={handleDateSelect}
+                        value={dateRange}
+                        returnValue="range"
+                        selectRange={true}
+                        className={!expandDateSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
+                      />
                     </div>
-                    <Calendar
-                      onChange={handleDateSelect}
-                      value={dateRange}
-                      returnValue="range"
-                      selectRange={true}
-                      className={!expandDateSel ? "hidden" : null} // Performancesteigerung ist noch fraglich...
+                  </div>
+                  <div className="timeBar-item-group">
+                    <span className="timeBar-item-label">Uhrzeit</span>
+                    <TimeRangePicker
+                      onChange={handleTimeSelect}
+                      value={timeRange}
+                      disableClock={true}
                     />
                   </div>
                 </div>
-                <div className="timeBar-item-group">
-                  <span className="timeBar-item-label">Uhrzeit</span>
-                  <TimeRangePicker
-                    onChange={handleTimeSelect}
-                    value={timeRange}
-                    disableClock={true}
-                  />
-                </div>
+              </div>
+              <div className="bar">
+                <Button
+                  clicked={() => fetchData(dateRange, timeRange)}
+                  icon={Refresh_Icon}
+                  rotate={true}
+                />
+                <Button
+                  clicked={() => {
+                    setShowImpress(true);
+                    setActivePage(null);
+                  }}
+                  icon={Imprint_Icon}
+                />
               </div>
             </div>
-            <div className="bar">
-              <RefreshButton clicked={() => fetchData(dateRange, timeRange)} />
+            <div className="dataView-wrapper">
+              {activePage && data
+                ? (function () {
+                    // Some properties are the same for all components and can be listed once
+                    let commonProps = {
+                      key: activePage.name,
+                      data: data,
+                      activeDot: handleActiveDot,
+                      minMaxAvg: handleMinMaxAvg,
+                    };
+                    return activePage.id === 0 ? (
+                      <DataView
+                        {...commonProps}
+                        dataProperty="co" // the property name in the raw data
+                        unit="ppm" // Y-axis label
+                        defaultYRange={[0, 300]} // the default range of the Y-Axis
+                        margin={{ left: 60, right: 25, top: 40, bottom: 35 }} // spacing for axis labels
+                      />
+                    ) : activePage.id === 1 ? (
+                      <DataView
+                        {...commonProps}
+                        dataProperty="temperature"
+                        unit="°C"
+                        defaultYRange={[0, 30]}
+                        margin={{ left: 50, right: 25, top: 40, bottom: 35 }}
+                      />
+                    ) : activePage.id === 2 ? (
+                      <DataView
+                        {...commonProps}
+                        dataProperty="humidity"
+                        unit="%"
+                        defaultYRange={[0, 100]}
+                        margin={{ left: 50, right: 25, top: 40, bottom: 35 }}
+                      />
+                    ) : null;
+                  })()
+                : null}
             </div>
-          </div>
-          <div className="dataView-wrapper">
-            {activePage && data
-              ? (function () {
-                  // Some properties are the same for all components and can be listed once
-                  let commonProps = {
-                    key: activePage.name,
-                    data: data,
-                    activeDot: handleActiveDot,
-                    minMaxAvg: handleMinMaxAvg,
-                  };
-                  return activePage.id === 0 ? (
-                    <DataView
-                      {...commonProps}
-                      dataProperty="co" // the property name in the raw data
-                      unit="ppm" // Y-axis label
-                      defaultYRange={[0, 300]} // the default range of the Y-Axis
-                      margin={{ left: 60, right: 20, top: 40, bottom: 35 }} // spacing for axis labels
-                    />
-                  ) : activePage.id === 1 ? (
-                    <DataView
-                      {...commonProps}
-                      dataProperty="temperature"
-                      unit="°C"
-                      defaultYRange={[0, 30]}
-                      margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
-                    />
-                  ) : activePage.id === 2 ? (
-                    <DataView
-                      {...commonProps}
-                      dataProperty="humidity"
-                      unit="%"
-                      defaultYRange={[0, 100]}
-                      margin={{ left: 50, right: 20, top: 40, bottom: 35 }}
-                    />
-                  ) : null;
-                })()
-              : null}
-          </div>
-          <div className="infoArea">
-            <div className="infoCard light-border">
-              <table>
-                <tbody>
-                  <tr>
-                    <td className="infoCard-header">Datum</td>
-                    <td className="infoCard-value space-l-20">
-                      {activeDot ? activeDot.data[0].day : "Keine Auswahl"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="infoCard-header">Uhrzeit</td>
-                    <td className="infoCard-value space-l-20">
-                      {activeDot
-                        ? activeDot.data[0].time + " Uhr"
-                        : "Keine Auswahl"}
-                    </td>
-                  </tr>
-                  <tr className="infoCard-value-big">
-                    <td colSpan="2">{activeDot ? activeDot.data[1] : "--"}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="infoCard infoCard-2 light-border">
-              <div className="infoCard-group">
-                <span className="infoCard-header">Minimum</span>
-                <span className="infoCard-value">{minMaxAvg.min}</span>
-                <span className="infoCard-header">Maximum</span>
-                <span className="infoCard-value">{minMaxAvg.max}</span>
-                <span className="infoCard-header">Mittelwert</span>
-                <span className="infoCard-value">{minMaxAvg.avg}</span>
+            <div id="section2">
+              <div className="infoCard light-border">
+                <table>
+                  <tbody>
+                    <tr>
+                      <td className="infoCard-header">Datum</td>
+                      <td className="infoCard-value space-l-20">
+                        {activeDot ? activeDot.data[0].day : "Keine Auswahl"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="infoCard-header">Uhrzeit</td>
+                      <td className="infoCard-value space-l-20">
+                        {activeDot
+                          ? activeDot.data[0].time + " Uhr"
+                          : "Keine Auswahl"}
+                      </td>
+                    </tr>
+                    <tr className="infoCard-value-big">
+                      <td colSpan="2">
+                        {activeDot ? activeDot.data[1] : "--"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="infoCard infoCard-2 light-border">
+                <div className="infoCard-group">
+                  <span className="infoCard-header">Minimum</span>
+                  <span className="infoCard-value">{minMaxAvg.min}</span>
+                  <span className="infoCard-header">Maximum</span>
+                  <span className="infoCard-value">{minMaxAvg.max}</span>
+                  <span className="infoCard-header">Mittelwert</span>
+                  <span className="infoCard-value">{minMaxAvg.avg}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default App;
